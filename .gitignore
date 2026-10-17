@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+data/*.csv
+results/final_models.joblib
+*.joblib
+.venv/
+results_fast/

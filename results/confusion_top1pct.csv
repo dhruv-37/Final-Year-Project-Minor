@@ -1,0 +1,85 @@
+model,year,n,frauds,investigated,TP,FP,FN,TN
+"Baseline: RUSBoost (paper, raw 28)",2003,5981,69,60,2,58,67,5854
+"Baseline: RUSBoost (paper, raw 28)",2004,5934,58,60,1,59,57,5817
+"Baseline: RUSBoost (paper, raw 28)",2005,5863,45,59,1,58,44,5760
+"Baseline: RUSBoost (paper, raw 28)",2006,5908,33,60,0,60,33,5815
+"Baseline: RUSBoost (paper, raw 28)",2007,5868,30,59,0,59,30,5779
+"Baseline: RUSBoost (paper, raw 28)",2008,5612,26,57,1,56,25,5530
+"Baseline: RUSBoost (paper, raw 28)",2009,5367,31,54,1,53,30,5283
+"Baseline: RUSBoost (paper, raw 28)",2010,5389,26,54,2,52,24,5311
+"Baseline: RUSBoost (paper, raw 28)",2011,5404,21,55,1,54,20,5329
+"Baseline: RUSBoost (paper, raw 28)",2012,5630,19,57,1,56,18,5555
+"Baseline: RUSBoost (paper, raw 28)",2013,5647,11,57,0,57,11,5579
+"Baseline: RUSBoost (paper, raw 28)",2014,5627,4,57,0,57,4,5566
+LightGBM bagged (raw 28),2003,5981,69,60,4,56,65,5856
+LightGBM bagged (raw 28),2004,5934,58,60,2,58,56,5818
+LightGBM bagged (raw 28),2005,5863,45,59,0,59,45,5759
+LightGBM bagged (raw 28),2006,5908,33,60,0,60,33,5815
+LightGBM bagged (raw 28),2007,5868,30,59,0,59,30,5779
+LightGBM bagged (raw 28),2008,5612,26,57,1,56,25,5530
+LightGBM bagged (raw 28),2009,5367,31,54,1,53,30,5283
+LightGBM bagged (raw 28),2010,5389,26,54,2,52,24,5311
+LightGBM bagged (raw 28),2011,5404,21,55,1,54,20,5329
+LightGBM bagged (raw 28),2012,5630,19,57,1,56,18,5555
+LightGBM bagged (raw 28),2013,5647,11,57,1,56,10,5580
+LightGBM bagged (raw 28),2014,5627,4,57,0,57,4,5566
+RUSBoost (enhanced),2003,5981,69,60,2,58,67,5854
+RUSBoost (enhanced),2004,5934,58,60,1,59,57,5817
+RUSBoost (enhanced),2005,5863,45,59,1,58,44,5760
+RUSBoost (enhanced),2006,5908,33,60,0,60,33,5815
+RUSBoost (enhanced),2007,5868,30,59,0,59,30,5779
+RUSBoost (enhanced),2008,5612,26,57,1,56,25,5530
+RUSBoost (enhanced),2009,5367,31,54,1,53,30,5283
+RUSBoost (enhanced),2010,5389,26,54,2,52,24,5311
+RUSBoost (enhanced),2011,5404,21,55,0,55,21,5328
+RUSBoost (enhanced),2012,5630,19,57,1,56,18,5555
+RUSBoost (enhanced),2013,5647,11,57,0,57,11,5579
+RUSBoost (enhanced),2014,5627,4,57,0,57,4,5566
+LightGBM bagged (enhanced),2003,5981,69,60,2,58,67,5854
+LightGBM bagged (enhanced),2004,5934,58,60,1,59,57,5817
+LightGBM bagged (enhanced),2005,5863,45,59,1,58,44,5760
+LightGBM bagged (enhanced),2006,5908,33,60,0,60,33,5815
+LightGBM bagged (enhanced),2007,5868,30,59,1,58,29,5780
+LightGBM bagged (enhanced),2008,5612,26,57,1,56,25,5530
+LightGBM bagged (enhanced),2009,5367,31,54,1,53,30,5283
+LightGBM bagged (enhanced),2010,5389,26,54,2,52,24,5311
+LightGBM bagged (enhanced),2011,5404,21,55,1,54,20,5329
+LightGBM bagged (enhanced),2012,5630,19,57,1,56,18,5555
+LightGBM bagged (enhanced),2013,5647,11,57,0,57,11,5579
+LightGBM bagged (enhanced),2014,5627,4,57,0,57,4,5566
+XGBoost bagged (enhanced),2003,5981,69,60,1,59,68,5853
+XGBoost bagged (enhanced),2004,5934,58,60,2,58,56,5818
+XGBoost bagged (enhanced),2005,5863,45,59,1,58,44,5760
+XGBoost bagged (enhanced),2006,5908,33,60,0,60,33,5815
+XGBoost bagged (enhanced),2007,5868,30,59,0,59,30,5779
+XGBoost bagged (enhanced),2008,5612,26,57,1,56,25,5530
+XGBoost bagged (enhanced),2009,5367,31,54,1,53,30,5283
+XGBoost bagged (enhanced),2010,5389,26,54,2,52,24,5311
+XGBoost bagged (enhanced),2011,5404,21,55,0,55,21,5328
+XGBoost bagged (enhanced),2012,5630,19,57,1,56,18,5555
+XGBoost bagged (enhanced),2013,5647,11,57,0,57,11,5579
+XGBoost bagged (enhanced),2014,5627,4,57,0,57,4,5566
+Logistic regression (enhanced),2003,5981,69,60,0,60,69,5852
+Logistic regression (enhanced),2004,5934,58,60,3,57,55,5819
+Logistic regression (enhanced),2005,5863,45,59,2,57,43,5761
+Logistic regression (enhanced),2006,5908,33,60,1,59,32,5816
+Logistic regression (enhanced),2007,5868,30,59,0,59,30,5779
+Logistic regression (enhanced),2008,5612,26,57,0,57,26,5529
+Logistic regression (enhanced),2009,5367,31,54,1,53,30,5283
+Logistic regression (enhanced),2010,5389,26,54,0,54,26,5309
+Logistic regression (enhanced),2011,5404,21,55,0,55,21,5328
+Logistic regression (enhanced),2012,5630,19,57,1,56,18,5555
+Logistic regression (enhanced),2013,5647,11,57,0,57,11,5579
+Logistic regression (enhanced),2014,5627,4,57,0,57,4,5566
+PROPOSED: ensemble,2003,5981,69,60,0,60,69,5852
+PROPOSED: ensemble,2004,5934,58,60,3,57,55,5819
+PROPOSED: ensemble,2005,5863,45,59,1,58,44,5760
+PROPOSED: ensemble,2006,5908,33,60,0,60,33,5815
+PROPOSED: ensemble,2007,5868,30,59,0,59,30,5779
+PROPOSED: ensemble,2008,5612,26,57,1,56,25,5530
+PROPOSED: ensemble,2009,5367,31,54,1,53,30,5283
+PROPOSED: ensemble,2010,5389,26,54,1,53,25,5310
+PROPOSED: ensemble,2011,5404,21,55,1,54,20,5329
+PROPOSED: ensemble,2012,5630,19,57,2,55,17,5556
+PROPOSED: ensemble,2013,5647,11,57,0,57,11,5579
+PROPOSED: ensemble,2014,5627,4,57,0,57,4,5566
