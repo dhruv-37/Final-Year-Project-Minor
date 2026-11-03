@@ -1,7 +1,7 @@
 """End-to-end pipeline: improved accounting-fraud detection (extends Bao et al., JAR 2020).
 
-    python run_pipeline.py                  # full run: test years 2003-2014   (~30-45 min, CPU only)
-    python run_pipeline.py --fast           # quick run: test years 2003-2008  (~10-15 min)
+    python run_pipeline.py                  # full run: test years 2003-2014   (~2 hours, CPU only)
+    python run_pipeline.py --fast           # quick run: test years 2003-2008  (~30-45 min)
     python run_pipeline.py --trim_frac 0.3  # optional: keep only 30% of NON-fraud firms for training
 
 Protocol = the authors' own (see run_RUSBoost.m), so numbers are directly comparable:
@@ -30,6 +30,7 @@ from sklearn.isotonic import IsotonicRegression
 from sklearn.metrics import precision_recall_curve, roc_auc_score, roc_curve
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
+from deep_models import TemporalMember  # noqa: E402
 from evaluate import (BOOT_METRICS, bootstrap_period, decision_metrics, period_mean,  # noqa: E402
                       per_year_metrics)
 from explain import explain_all  # noqa: E402
@@ -74,6 +75,8 @@ N_BAGS_EVAL = 5 if args.fast else 10
 TEST_YEARS = list(range(2003, 2009 if args.fast else 2015))
 BASE = 'Baseline: RUSBoost (paper, raw 28)'
 PROP = 'PROPOSED: ensemble'
+NO_HIST = 'Ensemble without firm history'
+TEMP = 'Temporal Transformer (firm history)'
 E = args.final_train_end
 
 # ----------------------------------------------------------------------------- data
@@ -141,6 +144,10 @@ def build_lgbm(p, n_bags):
 
 def build_xgb(p, n_bags):   # seed + 1: XGB bags draw different non-fraud samples than LGBM bags
     return BalancedBagger(xgb_factory(p, args.n_jobs), n_bags=n_bags, ratio=p['ratio'], seed=args.seed + 1)
+
+
+def build_temporal():       # settings frozen in experiments/, not re-tuned here
+    return TemporalMember(groups['rank_only'], seed=args.seed)
 
 
 REUSE = bool(args.reuse)
@@ -218,7 +225,7 @@ else:
 # ----------------------------------------------------------------------------- expanding-window test
 log(f'[5/7] expanding-window evaluation, test years {TEST_YEARS[0]}-{TEST_YEARS[-1]}')
 MODEL_NAMES = [BASE, 'LightGBM bagged (raw 28)', 'RUSBoost (enhanced)', 'LightGBM bagged (enhanced)',
-               'XGBoost bagged (enhanced)', 'Logistic regression (enhanced)', PROP]
+               'XGBoost bagged (enhanced)', 'Logistic regression (enhanced)', TEMP, NO_HIST, PROP]
 store = {m: [] for m in MODEL_NAMES}
 te_rows = []
 for yt in TEST_YEARS:
@@ -235,9 +242,11 @@ for yt in TEST_YEARS:
     p['LightGBM bagged (enhanced)'] = build_lgbm(bestL, N_BAGS_EVAL).fit(X_all[tr], ytr).predict_proba(X_all[te])
     p['XGBoost bagged (enhanced)'] = build_xgb(bestX, N_BAGS_EVAL).fit(X_all[tr], ytr).predict_proba(X_all[te])
     p['Logistic regression (enhanced)'] = LogReg().fit(X_all[tr], ytr).predict_proba(X_all[te])
+    p[TEMP] = build_temporal().fit(D, GVKEY, years, tr, ytr).predict_scores(D, GVKEY, years, te)
     key = {'LGBM': 'LightGBM bagged (enhanced)', 'XGB': 'XGBoost bagged (enhanced)',
            'LR': 'Logistic regression (enhanced)', 'RUSenh': 'RUSBoost (enhanced)', 'RUSraw': BASE}
-    p[PROP] = ensemble_scores([p[key[m]] for m in ENS_MEMBERS])
+    p[NO_HIST] = ensemble_scores([p[key[m]] for m in ENS_MEMBERS])
+    p[PROP] = ensemble_scores([p[key[m]] for m in ENS_MEMBERS] + [p[TEMP]])
     for m in MODEL_NAMES:
         store[m].append(p[m])
     te_rows.append(te)
@@ -270,7 +279,7 @@ excluded = [int(t) for t in TEST_YEARS if n_fr.get(t, 0) < max(1, args.min_fraud
 log(f'   years with < {args.min_frauds} frauds, listed in yearly_metrics.csv but excluded from period '
     f'means and bootstraps: {excluded or "none"}')
 
-summary = {'feature_set': best_fs, 'ensemble': best_combo, 'best_lgbm': bestL, 'best_xgb': bestX,
+summary = {'feature_set': best_fs, 'ensemble': best_combo + '+TT', 'best_lgbm': bestL, 'best_xgb': bestX,
            'cv_auc': {k: float(v) for k, v in combo_auc.items()}, 'final_train_end': E,
            'min_frauds': args.min_frauds, 'excluded_years': excluded, 'n_boot': args.n_boot, 'periods': {}}
 for lo, hi in periods:
@@ -334,7 +343,7 @@ plt.savefig(os.path.join(args.out, 'performance_curves.png'), dpi=150)
 plt.close()
 
 # ----------------------------------------------------------------------------- deployable model + SHAP
-log(f'\n[7/7] deployable model: fiscal years 1991-{E} (label delay), ensemble members {ENS_MEMBERS}')
+log(f'\n[7/7] deployable model: fiscal years 1991-{E} (label delay), ensemble members {ENS_MEMBERS} + TT')
 tr = np.where((years >= 1991) & (years <= E) & keep)[0]
 wz, D = winsorize(tr)
 X_all = D[FEATS].values
@@ -343,23 +352,26 @@ makers = {'LGBM': lambda: build_lgbm(bestL, 10).fit(X_all[tr], y[tr]),
           'LR': lambda: LogReg().fit(X_all[tr], y[tr]),
           'RUSenh': lambda: RUSBoost(seed=args.seed).fit(X_all[tr], y[tr])}
 mem = {m: makers[m]() for m in ENS_MEMBERS}
+temporal = build_temporal().fit(D, GVKEY, years, tr, y[tr])
 if not args.skip_final:
     joblib.dump({'features': FEATS, 'winsorizer': wz, 'winsor_cols': WCOLS, 'ensemble_members': ENS_MEMBERS,
-                 'models': mem, 'calibrator': iso, 'train_years': [1991, E]},
+                 'models': mem, 'temporal': temporal, 'calibrator': iso, 'train_years': [1991, E]},
                 os.path.join(args.out, 'final_models.joblib'), compress=3)
 
 ex_years = list(range(E + 2, TEST_YEARS[-1] + 1))
 note = ''
 if not ex_years:
     ex_years, note = list(range(2003, 2009)), ' (no test year after the training window: in-sample for this model)'
-log(f'   SHAP on the deployed members, explained on fiscal years {ex_years[0]}-{ex_years[-1]}{note}')
+log(f'   SHAP on the deployed tree and LR members (not the Temporal Transformer), explained on fiscal '
+    f'years {ex_years[0]}-{ex_years[-1]}{note}')
 ex = np.where(np.isin(years, ex_years))[0]
 X_ex = X_all[ex]
 raw_ex = {m: mem[m].predict_proba(X_ex) for m in ENS_MEMBERS}
+raw_ex['TT'] = temporal.predict_scores(D, GVKEY, years, ex)
 pct = np.zeros(len(ex))
 for t in ex_years:                     # same recipe as scoring: rank each member within the fiscal year
     k = years[ex] == t
-    pct[k] = ensemble_scores([raw_ex[m][k] for m in ENS_MEMBERS])
+    pct[k] = ensemble_scores([s[k] for s in raw_ex.values()])
 scores = pd.DataFrame({'risk_percentile': pct, 'risk_score': iso.predict(pct)})
 imp = explain_all(mem, pd.DataFrame(X_ex, columns=FEATS), y[ex],
                   df.loc[ex, ['gvkey', 'fyear']].reset_index(drop=True), scores,

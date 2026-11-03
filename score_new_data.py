@@ -2,7 +2,9 @@
 
 Input CSV needs: gvkey, fyear and the 28 raw Compustat columns + the 14 paper ratios
 (same layout as data_FraudDetection_JAR2020.csv). Include the PRIOR year's rows for each firm
-so growth/lag features can be computed.
+so growth/lag features can be computed. The Temporal Transformer member reads the firm's last 5
+fiscal years: years missing from the input are taken from the reference file, and a firm found in
+neither is scored on the shorter history it has.
 
 Why a reference file is needed: many features are percentile ranks WITHIN a fiscal year, and the
 final risk score is a rank too. Ranking a firm only against the other firms in the input file gives
@@ -27,6 +29,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
+from deep_models import HISTORY_YEARS  # noqa: E402
 from features import engineer  # noqa: E402
 from models import ensemble_scores  # noqa: E402
 
@@ -48,8 +51,10 @@ for d in (new, ref):
     if 'misstate' not in d:
         d['misstate'] = 0
 
-# Reference rows for the target year (the ranking population) and the year before (their lags).
-ref = ref[ref['fyear'].between(a.year - 1, a.year)]
+# Reference rows for the target year (the ranking population), the firm histories, and one year
+# before the oldest history row (its lags).
+first_hist = a.year - HISTORY_YEARS + 1
+ref = ref[ref['fyear'].between(first_hist - 1, a.year)]
 # A firm present in both files: the input row wins, so a user can overwrite stale reference data.
 ref = ref[~ref.set_index(['gvkey', 'fyear']).index.isin(new.set_index(['gvkey', 'fyear']).index)]
 new['_new'] = True
@@ -58,13 +63,16 @@ raw = pd.concat([ref, new], ignore_index=True)
 if raw.loc[raw['_new'] & (raw['fyear'] == a.year)].empty:
     sys.exit(f'no input rows for fyear {a.year}')
 
-df, _ = engineer(raw)                      # within-year ranks now span the whole market
-df = df[df['fyear'] == a.year].reset_index(drop=True)   # prior-year rows served their purpose
-D = art['winsorizer'].transform(df[art['winsor_cols']].astype(np.float32))
-X = D[art['features']].values
+hist, _ = engineer(raw)                    # within-year ranks now span the whole market
+hist = hist[hist['fyear'] >= first_hist].reset_index(drop=True)
+D_hist = art['winsorizer'].transform(hist[art['winsor_cols']].astype(np.float32))
+target = np.where(hist['fyear'] == a.year)[0]
+df = hist.iloc[target].reset_index(drop=True)   # earlier rows served their purpose
+X = D_hist[art['features']].values[target]
 
 # Same recipe as evaluation: rank every member within the year's cross-section, then average.
 raw_scores = [art['models'][m].predict_proba(X) for m in art['ensemble_members']]
+raw_scores.append(art['temporal'].predict_scores(D_hist, hist['gvkey'].values, hist['fyear'].values, target))
 df['raw_score'] = np.mean(raw_scores, axis=0)
 df['risk_percentile'] = ensemble_scores(raw_scores)
 df['fraud_probability'] = art['calibrator'].predict(df['risk_percentile'])

@@ -5,3 +5,5 @@ results/final_models.joblib
 *.joblib
 .venv/
 results_fast/
+results_tt/
+results/experiments/cache/
