@@ -1,0 +1,11 @@
+{
+  "first_time": {
+    "frauds": 240,
+    "first_time_frauds": 231,
+    "reference": 0.7690279127573992,
+    "candidate": 0.7836148268118813
+  },
+  "placebo_trees_only": 0.4784660047951867,
+  "gain": 0.014491597710622917,
+  "gain_market_shuffled": 0.007344632100463322
+}
