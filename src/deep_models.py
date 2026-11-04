@@ -1,17 +1,12 @@
-"""Deep tabular and sequence models, pure PyTorch and CPU-friendly.
+"""Sequence models over firm histories, pure PyTorch and CPU-friendly.
 
-    ftt         FT-Transformer (Gorishniy et al. 2021): features as tokens + [CLS]
-    mambular    Mambular (Thielmann et al. 2025): features as tokens through Mamba blocks, mean pool
-    tabm        TabM-mini (Gorishniy et al., ICLR 2025): k MLPs sharing weights, mean of predictions
     temp_trans  Temporal Transformer: a firm's last K fiscal years as the sequence
     temp_mamba  Temporal Mamba: the same sequence through Mamba blocks
 
 Mamba block = selective state space model of Gu & Dao (2023), written out because mamba-ssm needs
-compiled CUDA extensions. Numerical features use periodic "PLR lite" embeddings. Each epoch keeps
-all frauds and draws fresh non-frauds, so over the epochs the model sees most of the majority class.
+compiled CUDA extensions. Each epoch keeps all frauds and draws fresh non-frauds, so over the epochs
+the model sees most of the majority class.
 """
-import math
-
 import numpy as np
 import torch
 from sklearn.impute import SimpleImputer
@@ -34,22 +29,6 @@ class Preprocessor:
         X = np.asarray(X, dtype=np.float64)
         v = np.clip(self.qt_.transform(self.imp_.transform(X)), -5, 5)
         return v.astype(np.float32), np.isnan(X).astype(np.float32)
-
-
-class Tokenizer(nn.Module):
-    """One d-dimensional token per feature: periodic value code + feature identity + missing flag."""
-
-    def __init__(self, n_features, d, k=16, sigma=0.5):
-        super().__init__()
-        self.freq = nn.Parameter(torch.randn(n_features, k) * sigma)
-        self.proj = nn.Linear(2 * k, d)
-        self.ident = nn.Parameter(torch.randn(n_features, d) * 0.02)
-        self.miss = nn.Parameter(torch.randn(n_features, d) * 0.02)
-
-    def forward(self, x, m):
-        a = 2 * math.pi * x[..., None] * self.freq
-        v = F.relu(self.proj(torch.cat([a.cos(), a.sin()], -1)))
-        return v + self.ident + m[..., None] * self.miss
 
 
 class RMSNorm(nn.Module):
@@ -101,57 +80,6 @@ def _encoder_layers(d, n_layers, heads, dropout):
                          for _ in range(n_layers))
 
 
-class FTTransformer(nn.Module):
-    def __init__(self, n_features, d=32, n_layers=2, heads=4, dropout=0.1):
-        super().__init__()
-        self.tok = Tokenizer(n_features, d)
-        self.cls = nn.Parameter(torch.randn(1, 1, d) * 0.02)
-        self.layers = _encoder_layers(d, n_layers, heads, dropout)
-        self.head = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, 1))
-
-    def forward(self, x, m):
-        z = self.tok(x, m)
-        z = torch.cat([self.cls.expand(len(z), -1, -1), z], 1)
-        for lyr in self.layers:
-            z = lyr(z)
-        return self.head(z[:, 0]).squeeze(-1)
-
-
-class Mambular(nn.Module):
-    def __init__(self, n_features, d=32, n_layers=2, d_state=16, dropout=0.1):
-        super().__init__()
-        self.tok = Tokenizer(n_features, d)
-        self.layers = nn.ModuleList(MambaBlock(d, d_state, dropout=dropout) for _ in range(n_layers))
-        self.head = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, 1))
-
-    def forward(self, x, m):
-        z = self.tok(x, m)
-        for lyr in self.layers:
-            z = lyr(z)
-        return self.head(z.mean(1)).squeeze(-1)
-
-
-class TabM(nn.Module):
-    """TabM-mini: k members share all weights except one multiplicative adapter on the input."""
-
-    def __init__(self, n_features, d=8, width=256, n_layers=3, dropout=0.1, k=32):
-        super().__init__()
-        self.tok, self.k = Tokenizer(n_features, d), k
-        in_dim = n_features * d
-        self.adapter = nn.Parameter(torch.empty(k, in_dim).uniform_(0.9, 1.1))
-        blocks, w = [], in_dim
-        for _ in range(n_layers):
-            blocks += [nn.Linear(w, width), nn.ReLU(), nn.Dropout(dropout)]
-            w = width
-        self.body = nn.Sequential(*blocks)
-        self.head = nn.Parameter(torch.randn(k, width) * 0.01)
-        self.bias = nn.Parameter(torch.zeros(k))
-
-    def forward(self, x, m):
-        z = self.tok(x, m).flatten(1)[:, None] * self.adapter
-        return (self.body(z) * self.head).sum(-1) + self.bias      # (batch, k) logits
-
-
 class _Temporal(nn.Module):
     """Shared step encoder for firm histories: x, m are (batch, K, features), most recent year last."""
 
@@ -191,24 +119,7 @@ class TemporalMamba(_Temporal):
         return self.head(z[:, -1]).squeeze(-1)
 
 
-class GatedTemporalTransformer(TemporalTransformer):
-    """Temporal Transformer that weights each feature per firm-year before encoding it, after the
-    variable selection network of Temporal Fusion Transformers (Lim et al. 2021)."""
-
-    def __init__(self, n_features, gate='softmax', d=64, n_layers=2, heads=4, dropout=0.1, seq_len=5):
-        super().__init__(n_features, d, n_layers, heads, dropout, seq_len)
-        self.gate, self.n_features = gate, n_features
-        self.gate_net = nn.Sequential(nn.Linear(2 * n_features, d), nn.ReLU(), nn.Linear(d, n_features))
-
-    def forward(self, x, m, p):
-        w = self.gate_net(torch.cat([x, m], -1))
-        w = F.softmax(w, -1) * self.n_features if self.gate == 'softmax' else torch.sigmoid(w)
-        return super().forward(x * w, m, p)
-
-
-ARCH = {'ftt': FTTransformer, 'mambular': Mambular, 'tabm': TabM,
-        'temp_trans': TemporalTransformer, 'temp_mamba': TemporalMamba, 'gated_tt': GatedTemporalTransformer}
-TEMPORAL = ('temp_trans', 'temp_mamba', 'gated_tt')
+ARCH = {'temp_trans': TemporalTransformer, 'temp_mamba': TemporalMamba}
 
 
 def history_index(gvkey, years, k=5):

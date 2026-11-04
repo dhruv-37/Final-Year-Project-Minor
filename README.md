@@ -105,6 +105,30 @@ at least 0.002 CV AUC, then show a significant test gain that holds on all seeds
   0.53-0.55; the ensemble's gain holds for frauds at firms with no fraud label in training
   (0.757 → 0.769).
 
+### Dynamic feature selection: tried, did not raise ROC
+The 133 features are a fixed candidate pool. To test whether choosing features dynamically helps, 10
+selection families were run inside every training window, under rules fixed in advance
+(`experiments/PROTOCOL_FS.md`), against the current ensemble. A family's best setting had to gain at
+least +0.002 validation AUC on fresh seeds before it could see the test years. None did, so the test
+years were not used and the pipeline keeps the fixed pool.
+
+| Family | Fresh-seed CV AUC gain |
+|---|---|
+| Pool of 133 + 60 firm-history features, then DRFE | +0.0008 |
+| DRFE for logistic regression only | −0.0002 |
+| Soft selection: each bag samples features by importance | −0.0018 |
+| Per-firm-year gates inside the Temporal Transformer | −0.0025 |
+| mRMR | −0.0026 |
+| DRFE-subset LightGBM as an extra member | −0.0041 |
+| Adversarial drift filter | −0.0047 |
+| Out-of-time permutation importance | −0.0067 |
+| Stability selection | −0.0207 |
+| Shadow-feature test (Boruta) | −0.0311 |
+
+These 10 families are what was tried, not every method that exists. The code for them and for the
+other rejected methods was removed after testing; it is in git history at commit `255e803`, and
+their scores remain in `results/experiments/`.
+
 ## Explainability findings (SHAP on the deployed LGBM+XGB+LR members, 2012-2014, real base rate)
 Top drivers: firm size (`log_at`, `log_sale` and their ranks), gross PPE / assets, depreciation /
 assets, external financing need, investments / assets, current ratio, cash / assets.

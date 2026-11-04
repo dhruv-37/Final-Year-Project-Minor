@@ -1,7 +1,7 @@
-"""Transformer, Mamba and TabM models on the rank_only features (68 tokens or 5 x 68 histories).
+"""Temporal Transformer and Temporal Mamba on the rank_only features (5 x 68 firm histories).
 
-    python experiments/run_deep.py --stage cv [--arch ftt mambular ...]
-    python experiments/run_deep.py --stage test --arch ftt
+    python experiments/run_deep.py --stage cv [--arch temp_trans]
+    python experiments/run_deep.py --stage test --arch temp_trans
 """
 import argparse
 import json
@@ -10,7 +10,7 @@ import numpy as np
 from sklearn.metrics import roc_auc_score
 
 from common import OUT, SEEDS, ctx, keys, load, mask_serial, os, path, run_tasks, split, winsorized
-from deep_models import ARCH, TEMPORAL, DeepClassifier, Preprocessor, history_index, stack_history
+from deep_models import DeepClassifier, Preprocessor, history_index, stack_history
 from models import ensemble_scores
 from run_reference import MEMBERS, ref_path
 from scoring import cv_report, reference_cv, reference_ensemble, save_candidate
@@ -22,17 +22,17 @@ CV_MEMBERS, TEST_MEMBERS = 2, 3
 HIST_LEN = 5
 TUNE_SEED, CHECK_SEEDS = 42, (43, 44)
 SPACE = {
-    'ftt': dict(d=[16, 32, 48], n_layers=[1, 2, 3], dropout=[0.1, 0.2, 0.3]),
-    'mambular': dict(d=[16, 32, 48], n_layers=[1, 2, 3], d_state=[8, 16], dropout=[0.1, 0.2, 0.3]),
-    'tabm': dict(d=[4, 8, 16], width=[128, 256, 512], n_layers=[2, 3], dropout=[0.1, 0.2, 0.3]),
     'temp_trans': dict(d=[32, 64], n_layers=[1, 2], dropout=[0.1, 0.2, 0.3]),
     'temp_mamba': dict(d=[32, 64], n_layers=[1, 2], d_state=[8, 16], dropout=[0.1, 0.2, 0.3]),
 }
 
 
+CONFIG_STREAM = {'temp_trans': 3, 'temp_mamba': 4}      # fixed so the frozen configs stay reproducible
+
+
 def sample_config(arch, trial):
     """Deterministic config number `trial` for this architecture."""
-    rng = np.random.RandomState(1000 + 37 * list(ARCH).index(arch) + trial)
+    rng = np.random.RandomState(1000 + 37 * CONFIG_STREAM[arch] + trial)
     kw = {k: v[rng.randint(len(v))] for k, v in SPACE[arch].items()}
     kw = {k: (float(v) if k == 'dropout' else int(v)) for k, v in kw.items()}
     train = dict(lr=float(rng.choice([3e-4, 1e-3, 2e-3])), weight_decay=float(rng.choice([1e-5, 1e-4, 1e-3])),
@@ -46,10 +46,8 @@ def inputs(arch, key):
     tr, te = split(key)
     X = winsorized(tr)[c.groups['rank_only']].values
     v, m = Preprocessor().fit(X[tr]).transform(X)
-    if arch in TEMPORAL:
-        idx = history_index(c.gvkey, c.years, HIST_LEN)
-        return stack_history(v, m, idx[tr]), stack_history(v, m, idx[te]), tr, te
-    return (v[tr], m[tr]), (v[te], m[te]), tr, te
+    idx = history_index(c.gvkey, c.years, HIST_LEN)
+    return stack_history(v, m, idx[tr]), stack_history(v, m, idx[te]), tr, te
 
 
 def cv_task(arch, trial, key, seed, n_jobs, grid=EPOCHS):
