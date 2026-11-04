@@ -3,8 +3,8 @@
 Input CSV needs: gvkey, fyear and the 28 raw Compustat columns + the 14 paper ratios
 (same layout as data_FraudDetection_JAR2020.csv). Include the PRIOR year's rows for each firm
 so growth/lag features can be computed. The Temporal Transformer member reads the firm's last 5
-fiscal years: years missing from the input are taken from the reference file, and a firm found in
-neither is scored on the shorter history it has.
+fiscal years and the market features read up to 4 earlier ones: years missing from the input are
+taken from the reference file, and a firm found in neither is scored on the shorter history it has.
 
 Why a reference file is needed: many features are percentile ranks WITHIN a fiscal year, and the
 final risk score is a rank too. Ranking a firm only against the other firms in the input file gives
@@ -30,7 +30,7 @@ import pandas as pd
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
 from deep_models import HISTORY_YEARS  # noqa: E402
-from features import engineer  # noqa: E402
+from features import engineer, market_features  # noqa: E402
 from models import ensemble_scores  # noqa: E402
 
 ap = argparse.ArgumentParser()
@@ -64,8 +64,11 @@ if raw.loc[raw['_new'] & (raw['fyear'] == a.year)].empty:
     sys.exit(f'no input rows for fyear {a.year}')
 
 hist, _ = engineer(raw)                    # within-year ranks now span the whole market
-hist = hist[hist['fyear'] >= first_hist].reset_index(drop=True)
+market = market_features(hist[art['winsor_cols']].astype(np.float32), hist['gvkey'].values, hist['fyear'].values)
+in_hist = (hist['fyear'] >= first_hist).values
+hist = hist[in_hist].reset_index(drop=True)
 D_hist = art['winsorizer'].transform(hist[art['winsor_cols']].astype(np.float32))
+D_hist = pd.concat([D_hist, market[in_hist].reset_index(drop=True)], axis=1)
 target = np.where(hist['fyear'] == a.year)[0]
 df = hist.iloc[target].reset_index(drop=True)   # earlier rows served their purpose
 X = D_hist[art['features']].values[target]

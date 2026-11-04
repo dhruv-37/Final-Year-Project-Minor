@@ -83,27 +83,39 @@ Temporal Transformer (firm history),2011,5404,21,55,0,55,21,5328
 Temporal Transformer (firm history),2012,5630,19,57,0,57,19,5554
 Temporal Transformer (firm history),2013,5647,11,57,0,57,11,5579
 Temporal Transformer (firm history),2014,5627,4,57,0,57,4,5566
-Ensemble without firm history,2003,5981,69,60,0,60,69,5852
-Ensemble without firm history,2004,5934,58,60,3,57,55,5819
+Previous ensemble (no market features or recency weights),2003,5981,69,60,1,59,68,5853
+Previous ensemble (no market features or recency weights),2004,5934,58,60,6,54,52,5822
+Previous ensemble (no market features or recency weights),2005,5863,45,59,2,57,43,5761
+Previous ensemble (no market features or recency weights),2006,5908,33,60,0,60,33,5815
+Previous ensemble (no market features or recency weights),2007,5868,30,59,1,58,29,5780
+Previous ensemble (no market features or recency weights),2008,5612,26,57,0,57,26,5529
+Previous ensemble (no market features or recency weights),2009,5367,31,54,0,54,31,5282
+Previous ensemble (no market features or recency weights),2010,5389,26,54,1,53,25,5310
+Previous ensemble (no market features or recency weights),2011,5404,21,55,2,53,19,5330
+Previous ensemble (no market features or recency weights),2012,5630,19,57,0,57,19,5554
+Previous ensemble (no market features or recency weights),2013,5647,11,57,0,57,11,5579
+Previous ensemble (no market features or recency weights),2014,5627,4,57,0,57,4,5566
+Ensemble without firm history,2003,5981,69,60,2,58,67,5854
+Ensemble without firm history,2004,5934,58,60,2,58,56,5818
 Ensemble without firm history,2005,5863,45,59,1,58,44,5760
-Ensemble without firm history,2006,5908,33,60,0,60,33,5815
-Ensemble without firm history,2007,5868,30,59,0,59,30,5779
+Ensemble without firm history,2006,5908,33,60,1,59,32,5816
+Ensemble without firm history,2007,5868,30,59,1,58,29,5780
 Ensemble without firm history,2008,5612,26,57,1,56,25,5530
 Ensemble without firm history,2009,5367,31,54,1,53,30,5283
-Ensemble without firm history,2010,5389,26,54,1,53,25,5310
-Ensemble without firm history,2011,5404,21,55,1,54,20,5329
-Ensemble without firm history,2012,5630,19,57,2,55,17,5556
-Ensemble without firm history,2013,5647,11,57,0,57,11,5579
-Ensemble without firm history,2014,5627,4,57,0,57,4,5566
-PROPOSED: ensemble,2003,5981,69,60,1,59,68,5853
-PROPOSED: ensemble,2004,5934,58,60,6,54,52,5822
+Ensemble without firm history,2010,5389,26,54,0,54,26,5309
+Ensemble without firm history,2011,5404,21,55,0,55,21,5328
+Ensemble without firm history,2012,5630,19,57,1,56,18,5555
+Ensemble without firm history,2013,5647,11,57,1,56,10,5580
+Ensemble without firm history,2014,5627,4,57,1,56,3,5567
+PROPOSED: ensemble,2003,5981,69,60,2,58,67,5854
+PROPOSED: ensemble,2004,5934,58,60,3,57,55,5819
 PROPOSED: ensemble,2005,5863,45,59,2,57,43,5761
-PROPOSED: ensemble,2006,5908,33,60,0,60,33,5815
+PROPOSED: ensemble,2006,5908,33,60,1,59,32,5816
 PROPOSED: ensemble,2007,5868,30,59,1,58,29,5780
 PROPOSED: ensemble,2008,5612,26,57,0,57,26,5529
 PROPOSED: ensemble,2009,5367,31,54,0,54,31,5282
 PROPOSED: ensemble,2010,5389,26,54,1,53,25,5310
-PROPOSED: ensemble,2011,5404,21,55,2,53,19,5330
+PROPOSED: ensemble,2011,5404,21,55,1,54,20,5329
 PROPOSED: ensemble,2012,5630,19,57,0,57,19,5554
 PROPOSED: ensemble,2013,5647,11,57,0,57,11,5579
 PROPOSED: ensemble,2014,5627,4,57,0,57,4,5566

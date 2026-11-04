@@ -34,10 +34,10 @@ from deep_models import TemporalMember  # noqa: E402
 from evaluate import (BOOT_METRICS, bootstrap_period, decision_metrics, period_mean,  # noqa: E402
                       per_year_metrics)
 from explain import explain_all  # noqa: E402
-from features import Winsorizer, engineer  # noqa: E402
-from models import (BalancedBagger, LogReg, RUSBoost, cv_predict, ensemble_scores,  # noqa: E402
-                    lgbm_factory, make_folds, mask_serial, random_search, sample_lgbm,
-                    sample_xgb, xgb_factory)
+from features import Winsorizer, engineer, market_features  # noqa: E402
+from models import (TREE_LGBM, TREE_XGB, BalancedBagger, LogReg, RUSBoost, WeightedBagger,  # noqa: E402
+                    cv_predict, ensemble_scores, lgbm_factory, make_folds, mask_serial, random_search,
+                    recency_weights, sample_lgbm, sample_xgb, xgb_factory)
 
 ap = argparse.ArgumentParser()
 ap.add_argument('--data', default='data/data_FraudDetection_JAR2020.csv')
@@ -75,6 +75,7 @@ N_BAGS_EVAL = 5 if args.fast else 10
 TEST_YEARS = list(range(2003, 2009 if args.fast else 2015))
 BASE = 'Baseline: RUSBoost (paper, raw 28)'
 PROP = 'PROPOSED: ensemble'
+PREV = 'Previous ensemble (no market features or recency weights)'
 NO_HIST = 'Ensemble without firm history'
 TEMP = 'Temporal Transformer (firm history)'
 E = args.final_train_end
@@ -103,6 +104,7 @@ if args.trim_frac < 1.0:
 CANDIDATES = ['enhanced', 'rank_only', 'enhanced_rank']       # scale-free sets for the proposed model
 WCOLS = groups['raw28'] + groups['enhanced_rank']
 DW = df[WCOLS].astype(np.float32)
+MARKET = market_features(DW, GVKEY, years)     # earlier years and same-year ranks only, so built once
 
 
 def winsorize(fit_rows):
@@ -148,6 +150,16 @@ def build_xgb(p, n_bags):   # seed + 1: XGB bags draw different non-fraud sample
 
 def build_temporal():       # settings frozen in experiments/, not re-tuned here
     return TemporalMember(groups['rank_only'], seed=args.seed)
+
+
+def fit_member(m, X, ytr, yrs, n_bags):
+    """One member of the proposed ensemble, on the pool with market features. Tree settings and
+    recency weights are frozen in experiments/, not re-tuned here."""
+    if m == 'LGBM':
+        return WeightedBagger(lgbm_factory(TREE_LGBM, args.n_jobs), n_bags, TREE_LGBM['ratio'], args.seed).fit(X, ytr, recency_weights(yrs))
+    if m == 'XGB':
+        return WeightedBagger(xgb_factory(TREE_XGB, args.n_jobs), n_bags, TREE_XGB['ratio'], args.seed + 1).fit(X, ytr, recency_weights(yrs))
+    return LogReg().fit(X, ytr) if m == 'LR' else RUSBoost(seed=args.seed).fit(X, ytr)
 
 
 REUSE = bool(args.reuse)
@@ -225,7 +237,8 @@ else:
 # ----------------------------------------------------------------------------- expanding-window test
 log(f'[5/7] expanding-window evaluation, test years {TEST_YEARS[0]}-{TEST_YEARS[-1]}')
 MODEL_NAMES = [BASE, 'LightGBM bagged (raw 28)', 'RUSBoost (enhanced)', 'LightGBM bagged (enhanced)',
-               'XGBoost bagged (enhanced)', 'Logistic regression (enhanced)', TEMP, NO_HIST, PROP]
+               'XGBoost bagged (enhanced)', 'Logistic regression (enhanced)', TEMP, PREV, NO_HIST, PROP]
+POOL = FEATS + list(MARKET.columns)
 store = {m: [] for m in MODEL_NAMES}
 te_rows = []
 for yt in TEST_YEARS:
@@ -235,6 +248,7 @@ for yt in TEST_YEARS:
     ytr = mask_serial(y, PAAER, tr, te)
     _, D = winsorize(tr)
     X_all, X_raw = D[FEATS].values, D[groups['raw28']].values
+    X_pool = np.c_[X_all, MARKET.values]
     p = {}
     p[BASE] = RUSBoost(seed=args.seed).fit(X_raw[tr], ytr).predict_proba(X_raw[te])
     p['LightGBM bagged (raw 28)'] = build_lgbm(bestL, N_BAGS_EVAL).fit(X_raw[tr], ytr).predict_proba(X_raw[te])
@@ -245,8 +259,10 @@ for yt in TEST_YEARS:
     p[TEMP] = build_temporal().fit(D, GVKEY, years, tr, ytr).predict_scores(D, GVKEY, years, te)
     key = {'LGBM': 'LightGBM bagged (enhanced)', 'XGB': 'XGBoost bagged (enhanced)',
            'LR': 'Logistic regression (enhanced)', 'RUSenh': 'RUSBoost (enhanced)', 'RUSraw': BASE}
-    p[NO_HIST] = ensemble_scores([p[key[m]] for m in ENS_MEMBERS])
-    p[PROP] = ensemble_scores([p[key[m]] for m in ENS_MEMBERS] + [p[TEMP]])
+    p[PREV] = ensemble_scores([p[key[m]] for m in ENS_MEMBERS] + [p[TEMP]])
+    members = [fit_member(m, X_pool[tr], ytr, years[tr], N_BAGS_EVAL).predict_proba(X_pool[te]) for m in ENS_MEMBERS]
+    p[NO_HIST] = ensemble_scores(members)
+    p[PROP] = ensemble_scores(members + [p[TEMP]])
     for m in MODEL_NAMES:
         store[m].append(p[m])
     te_rows.append(te)
@@ -280,7 +296,7 @@ log(f'   years with < {args.min_frauds} frauds, listed in yearly_metrics.csv but
     f'means and bootstraps: {excluded or "none"}')
 
 summary = {'feature_set': best_fs, 'ensemble': best_combo + '+TT', 'best_lgbm': bestL, 'best_xgb': bestX,
-           'cv_auc': {k: float(v) for k, v in combo_auc.items()}, 'final_train_end': E,
+           'tree_lgbm': TREE_LGBM, 'tree_xgb': TREE_XGB, 'cv_auc': {k: float(v) for k, v in combo_auc.items()}, 'final_train_end': E,
            'min_frauds': args.min_frauds, 'excluded_years': excluded, 'n_boot': args.n_boot, 'periods': {}}
 for lo, hi in periods:
     use = [t for t in range(lo, hi + 1) if t in TEST_YEARS and t not in excluded]
@@ -346,15 +362,11 @@ plt.close()
 log(f'\n[7/7] deployable model: fiscal years 1991-{E} (label delay), ensemble members {ENS_MEMBERS} + TT')
 tr = np.where((years >= 1991) & (years <= E) & keep)[0]
 wz, D = winsorize(tr)
-X_all = D[FEATS].values
-makers = {'LGBM': lambda: build_lgbm(bestL, 10).fit(X_all[tr], y[tr]),
-          'XGB': lambda: build_xgb(bestX, 10).fit(X_all[tr], y[tr]),
-          'LR': lambda: LogReg().fit(X_all[tr], y[tr]),
-          'RUSenh': lambda: RUSBoost(seed=args.seed).fit(X_all[tr], y[tr])}
-mem = {m: makers[m]() for m in ENS_MEMBERS}
+X_all = np.c_[D[FEATS].values, MARKET.values]
+mem = {m: fit_member(m, X_all[tr], y[tr], years[tr], 10) for m in ENS_MEMBERS}
 temporal = build_temporal().fit(D, GVKEY, years, tr, y[tr])
 if not args.skip_final:
-    joblib.dump({'features': FEATS, 'winsorizer': wz, 'winsor_cols': WCOLS, 'ensemble_members': ENS_MEMBERS,
+    joblib.dump({'features': POOL, 'winsorizer': wz, 'winsor_cols': WCOLS, 'ensemble_members': ENS_MEMBERS,
                  'models': mem, 'temporal': temporal, 'calibrator': iso, 'train_years': [1991, E]},
                 os.path.join(args.out, 'final_models.joblib'), compress=3)
 
@@ -373,7 +385,7 @@ for t in ex_years:                     # same recipe as scoring: rank each membe
     k = years[ex] == t
     pct[k] = ensemble_scores([s[k] for s in raw_ex.values()])
 scores = pd.DataFrame({'risk_percentile': pct, 'risk_score': iso.predict(pct)})
-imp = explain_all(mem, pd.DataFrame(X_ex, columns=FEATS), y[ex],
+imp = explain_all(mem, pd.DataFrame(X_ex, columns=POOL), y[ex],
                   df.loc[ex, ['gvkey', 'fyear']].reset_index(drop=True), scores,
                   os.path.join(args.out, 'explain'), seed=args.seed, log=log)
 log('\n   Top-10 features by mean |SHAP|:')
