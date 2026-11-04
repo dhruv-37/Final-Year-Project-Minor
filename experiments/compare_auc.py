@@ -1,4 +1,5 @@
-"""Stage 2 of PROTOCOL_AUC.md and PROTOCOL_TEXT.md: frozen candidates against the current ensemble.
+"""Stage 2 of PROTOCOL_AUC.md: candidates with test scores in the cache against the previous ensemble.
+The recorded Holm p-values cover 3 candidates; rerun with fewer, they come out smaller.
 
     python experiments/compare_auc.py
 """
@@ -13,7 +14,7 @@ from compare import MIN_FRAUDS, N_BOOT, PERIODS, holm, stacked
 from evaluate import BOOT_METRICS, bootstrap_period, per_year_metrics, period_mean
 from run_auc import reference
 
-SOURCES = {'auc': os.path.join(CACHE, 'auc', 'candidates'), 'text': os.path.join(CACHE, 'text', 'candidates')}
+FOLDER = os.path.join(CACHE, 'auc', 'candidates')
 
 
 def main():
@@ -23,13 +24,10 @@ def main():
     y, yrs = c.y[te], c.years[te]
     pos_key = np.where(np.isnan(c.paaer), -c.gvkey, c.paaer)[te]
     preds = {('reference', s): stacked({k: reference(k, s) for k in test_keys}, test_keys) for s in SEEDS}
-    names = {}
-    for src, folder in SOURCES.items():
-        for f in glob.glob(os.path.join(folder, '*.pkl')):
-            names[os.path.basename(f).rsplit('_s', 1)[0]] = folder
-    for n, folder in names.items():
+    names = {os.path.basename(f).rsplit('_s', 1)[0] for f in glob.glob(os.path.join(FOLDER, '*.pkl'))}
+    for n in names:
         for s in SEEDS:
-            preds[(n, s)] = stacked(load(os.path.join(folder, f'{n}_s{s}.pkl')), test_keys)
+            preds[(n, s)] = stacked(load(os.path.join(FOLDER, f'{n}_s{s}.pkl')), test_keys)
     yearly = {key: per_year_metrics(y, p, yrs) for key, p in preds.items()}
     use = [t for t in TEST_YEARS if y[yrs == t].sum() >= MIN_FRAUDS]
     boot = bootstrap_period(y, preds, yrs, pos_key, c.gvkey[te], use, n_boot=N_BOOT, seed=42)

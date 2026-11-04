@@ -1,31 +1,28 @@
-"""Leakage audit of the frozen PROTOCOL_AUC.md candidates, validation folds only.
+"""Leakage audit of the adopted PROTOCOL_AUC.md candidate, validation folds only.
 
-    python experiments/audit_auc.py A1_mkt+A4_3+A11_both
+    python experiments/audit_auc.py
 
 1. First-time frauds: the gain on frauds whose firm has no fraud label left in training.
 2. Placebo: training labels shuffled within each fiscal year must give AUC near 0.5.
 3. Market block shuffled within each fiscal year: the gain must fall back to what the rest gives alone.
-4. Fold by fold and era by era, where the gain comes from.
 """
 import json
-import sys
 
 import numpy as np
 from sklearn.metrics import roc_auc_score
 
 from common import N_BAGS, OUT, ctx, keys, load, mask_serial, os, path, run_tasks, split
-from models import BalancedBagger, LogReg, ensemble_scores, lgbm_factory, xgb_factory
-from run_auc import CHECK_SEEDS, frame, member_path, reference, retuned, row_weights, score, spec, tt_score
+from models import TREE_LGBM, TREE_XGB, LogReg, WeightedBagger, ensemble_scores, lgbm_factory, recency_weights, xgb_factory
+from run_auc import CHECK_SEEDS, SETTING, frame, reference, score, tt_score
 from run_reference import MEMBERS
 
 
-def fit_variant(setting, key, member, seed, mode, n_jobs):
+def fit_variant(key, member, seed, mode, n_jobs):
     """Refit one member with shuffled labels ('labels') or a shuffled market block ('market')."""
     c = ctx()
     tr, te = split(key)
     ytr = mask_serial(c.y, c.paaer, tr, te)
-    s = spec(setting)
-    D, feats = frame(s, key, tr, ytr)
+    D, feats = frame(tr)
     rng = np.random.RandomState(seed + 500)
     if mode == 'labels':
         for yr in np.unique(c.years[tr]):
@@ -41,19 +38,16 @@ def fit_variant(setting, key, member, seed, mode, n_jobs):
     X = D[feats].values
     if member == 'LR':
         return LogReg().fit(X[tr], ytr).predict_proba(X[te])
-    p = retuned(member) if member in s['retune'] else (c.bestL if member == 'LGBM' else c.bestX)
+    p = TREE_LGBM if member == 'LGBM' else TREE_XGB
     make, sd = (lgbm_factory(p, n_jobs), seed) if member == 'LGBM' else (xgb_factory(p, n_jobs), seed + 1)
-    if s['weight']:
-        from auc_features import WeightedBagger
-        return WeightedBagger(make, N_BAGS, p['ratio'], sd).fit(X[tr], ytr, row_weights(s, D, feats, tr, te, seed, n_jobs)).predict_proba(X[te])
-    return BalancedBagger(make, N_BAGS, p['ratio'], sd).fit(X[tr], ytr).predict_proba(X[te])
+    return WeightedBagger(make, N_BAGS, p['ratio'], sd).fit(X[tr], ytr, recency_weights(c.years[tr])).predict_proba(X[te])
 
 
-def variant_path(setting, key, member, seed, mode):
-    return path('auc', 'audit', f'{mode}_{setting}_{key}_{member}_s{seed}.pkl')
+def variant_path(key, member, seed, mode):
+    return path('auc', 'audit', f'{mode}_{SETTING}_{key}_{member}_s{seed}.pkl')
 
 
-def first_time(setting, epoch):
+def first_time():
     c = ctx()
     out = {'reference': [], 'candidate': []}
     n, new = 0, 0
@@ -66,30 +60,26 @@ def first_time(setting, epoch):
         n, new = n + int(y.sum()), new + int(y[keep].sum())
         for s in CHECK_SEEDS:
             out['reference'].append(roc_auc_score(y[keep], reference(k, s)[keep]))
-            out['candidate'].append(roc_auc_score(y[keep], score(setting, k, s, epoch)[keep]))
+            out['candidate'].append(roc_auc_score(y[keep], score(k, s)[keep]))
     return {'frauds': n, 'first_time_frauds': new, 'reference': float(np.mean(out['reference'])), 'candidate': float(np.mean(out['candidate']))}
 
 
 def main():
-    setting = sys.argv[1]
     c = ctx()
-    s = spec(setting)
-    res = {'first_time': first_time(setting, None)}
+    res = {'first_time': first_time()}
     print(res['first_time'], flush=True)
-    modes = ['labels'] + (['market'] if 'A1' in s['pool'] else [])
-    run_tasks([(fit_variant, variant_path(setting, k, m, sd, mode), dict(setting=setting, key=k, member=m, seed=sd, mode=mode))
-               for mode in modes for k in keys('cv') for m in MEMBERS for sd in CHECK_SEEDS], n_workers=5, threads=3)
+    run_tasks([(fit_variant, variant_path(k, m, sd, mode), dict(key=k, member=m, seed=sd, mode=mode))
+               for mode in ('labels', 'market') for k in keys('cv') for m in MEMBERS for sd in CHECK_SEEDS], n_workers=5, threads=3)
 
     def auc(fn):
         return float(np.mean([roc_auc_score(c.y[split(k)[1]], fn(k, sd)) for k in keys('cv') for sd in CHECK_SEEDS]))
 
-    res['placebo_trees_only'] = auc(lambda k, sd: ensemble_scores([load(variant_path(setting, k, m, sd, 'labels')) for m in MEMBERS]))
+    res['placebo_trees_only'] = auc(lambda k, sd: ensemble_scores([load(variant_path(k, m, sd, 'labels')) for m in MEMBERS]))
     print('placebo, shuffled labels, trees and LR only:', res['placebo_trees_only'], flush=True)
     ref = auc(reference)
-    res['gain'] = auc(lambda k, sd: score(setting, k, sd)) - ref
-    if 'market' in modes:
-        res['gain_market_shuffled'] = auc(lambda k, sd: ensemble_scores([load(variant_path(setting, k, m, sd, 'market')) for m in MEMBERS] + [tt_score(k, sd)])) - ref
-        print('gain', res['gain'], 'with market block shuffled', res['gain_market_shuffled'], flush=True)
+    res['gain'] = auc(score) - ref
+    res['gain_market_shuffled'] = auc(lambda k, sd: ensemble_scores([load(variant_path(k, m, sd, 'market')) for m in MEMBERS] + [tt_score(k, sd)])) - ref
+    print('gain', res['gain'], 'with market block shuffled', res['gain_market_shuffled'], flush=True)
     json.dump(res, open(os.path.join(OUT, 'audit_auc.json'), 'w'), indent=2)
 
 
