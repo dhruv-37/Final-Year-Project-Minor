@@ -2,18 +2,18 @@
    rows=141,463  frauds=949  pre-test rows=67,166 (frauds 499)  test years=2003-2014
 [reuse] feature set=enhanced_rank, ensemble=LGBM+XGB+LR, lgbm={'n_estimators': 336, 'learning_rate': 0.0346610002369913, 'num_leaves': 7, 'min_child_samples': 22, 'colsample_bytree': 0.4461879458972758, 'subsample': 0.6448757264568841, 'reg_lambda': 0.2529607953803134, 'ratio': 5}, xgb={'n_estimators': 353, 'learning_rate': 0.0265827214686733, 'max_depth': 6, 'min_child_weight': 2.937056634884676, 'colsample_bytree': 0.9429827083799504, 'subsample': 0.7761320735057018, 'reg_lambda': 12.949253084343828, 'ratio': 20}
 [5/7] expanding-window evaluation, test years 2003-2014
-   test 2003: train rows=67,166 (frauds 402)  test frauds= 69  AUC baseline=0.740  proposed=0.742  [215s]
-   test 2004: train rows=73,233 (frauds 467)  test frauds= 58  AUC baseline=0.746  proposed=0.770  [221s]
-   test 2005: train rows=79,214 (frauds 538)  test frauds= 45  AUC baseline=0.718  proposed=0.720  [233s]
-   test 2006: train rows=85,148 (frauds 660)  test frauds= 33  AUC baseline=0.736  proposed=0.748  [260s]
-   test 2007: train rows=91,011 (frauds 720)  test frauds= 30  AUC baseline=0.647  proposed=0.745  [280s]
-   test 2008: train rows=96,919 (frauds 758)  test frauds= 26  AUC baseline=0.643  proposed=0.742  [294s]
-   test 2009: train rows=102,787 (frauds 790)  test frauds= 31  AUC baseline=0.667  proposed=0.740  [300s]
-   test 2010: train rows=108,399 (frauds 807)  test frauds= 26  AUC baseline=0.708  proposed=0.744  [310s]
-   test 2011: train rows=113,766 (frauds 834)  test frauds= 21  AUC baseline=0.711  proposed=0.751  [326s]
-   test 2012: train rows=119,155 (frauds 876)  test frauds= 19  AUC baseline=0.728  proposed=0.778  [320s]
-   test 2013: train rows=124,559 (frauds 907)  test frauds= 11  AUC baseline=0.723  proposed=0.729  [331s]
-   test 2014: train rows=130,189 (frauds 927)  test frauds=  4  AUC baseline=0.699  proposed=0.752  [340s]
+   test 2003: train rows=67,166 (frauds 402)  test frauds= 69  AUC baseline=0.740  proposed=0.742  [393s]
+   test 2004: train rows=73,233 (frauds 467)  test frauds= 58  AUC baseline=0.746  proposed=0.770  [448s]
+   test 2005: train rows=79,214 (frauds 538)  test frauds= 45  AUC baseline=0.718  proposed=0.720  [415s]
+   test 2006: train rows=85,148 (frauds 660)  test frauds= 33  AUC baseline=0.736  proposed=0.748  [441s]
+   test 2007: train rows=91,011 (frauds 720)  test frauds= 30  AUC baseline=0.647  proposed=0.745  [521s]
+   test 2008: train rows=96,919 (frauds 758)  test frauds= 26  AUC baseline=0.643  proposed=0.742  [555s]
+   test 2009: train rows=102,787 (frauds 790)  test frauds= 31  AUC baseline=0.667  proposed=0.740  [606s]
+   test 2010: train rows=108,399 (frauds 807)  test frauds= 26  AUC baseline=0.708  proposed=0.744  [557s]
+   test 2011: train rows=113,766 (frauds 834)  test frauds= 21  AUC baseline=0.711  proposed=0.751  [564s]
+   test 2012: train rows=119,155 (frauds 876)  test frauds= 19  AUC baseline=0.728  proposed=0.778  [521s]
+   test 2013: train rows=124,559 (frauds 907)  test frauds= 11  AUC baseline=0.723  proposed=0.729  [638s]
+   test 2014: train rows=130,189 (frauds 927)  test frauds=  4  AUC baseline=0.699  proposed=0.752  [576s]
 [6/7] results
    years with < 15 frauds, listed in yearly_metrics.csv but excluded from period means and bootstraps: [2013, 2014]
 
@@ -59,7 +59,7 @@ Previous ensemble (no market features or recency weights) 0.7433  0.0174   0.023
    9      0.9240                  0.0223               0.0218 4593
 
 [7/7] deployable model: fiscal years 1991-2010 (label delay), ensemble members ['LGBM', 'XGB', 'LR'] + TT
-   SHAP on the deployed tree and LR members (not the Temporal Transformer), explained on fiscal years 2012-2014
+   SHAP on the deployed members, explained on fiscal years 2012-2014
   computing SHAP on a random sample of 3000 rows (5 frauds, real base rate)
   LGBM: TreeExplainer on all 10 bags
   XGB: TreeExplainer on all 10 bags
@@ -77,5 +77,20 @@ log_sale_yr       0.282120                                    Within-year percen
  ivao_ta_yr       0.138545 Within-year percentile rank of ivao_ta (Investments & advances (other) / total assets)
    dp_ta_yr       0.106947      Within-year percentile rank of dp_ta (Depreciation & amortisation / total assets)
   rect_sale       0.106628                                                                    Receivables / sales
+  Temporal Transformer: expected gradients on 3000 rows, 5 years x 68 features, 3 networks
+  Temporal Transformer, share of attribution by year: t-4 9%, t-3 12%, t-2 17%, t-1 23%, t 38%
 
-Done in 64.0 min. Outputs in C:\Users\dhruv\AppData\Local\Temp\claude\D--Final-Year-Project\87dfbc8f-45a7-46ec-a526-c6d548557d79\scratchpad\results_mkt/
+   Temporal Transformer, top-10 features by mean |SHAP|:
+       feature  mean_abs_shap                                                                                                             meaning
+   log_sale_yr       0.319603                                                                 Within-year percentile rank of log_sale (Log sales)
+          loss       0.251338                                                                                                    Loss-making flag
+      dp_ta_yr       0.246691                                   Within-year percentile rank of dp_ta (Depreciation & amortisation / total assets)
+   altman_z_yr       0.242613 Within-year percentile rank of altman_z (Altman Z-score. Lower = more financial distress (incentive to manipulate))
+       reoa_yr       0.176905                                                    Within-year percentile rank of reoa (Retained earnings / assets)
+soft_assets_yr       0.163972                                                          Within-year percentile rank of soft_assets (% soft assets)
+     log_at_yr       0.163143                                                      Within-year percentile rank of log_at (Firm size (log assets))
+     ppe_ta_yr       0.163118                                                          Within-year percentile rank of ppe_ta (Gross PPE / assets)
+  rect_sale_yr       0.158987                                                      Within-year percentile rank of rect_sale (Receivables / sales)
+      issue_yr       0.141219                                                       Within-year percentile rank of issue (Security issuance flag)
+
+Done in 118.2 min. Outputs in C:\Users\dhruv\AppData\Local\Temp\claude\4dbe2732d992f3cf\c204aa93-83d6-43da-95bb-3cd189431532\scratchpad\results_shap/

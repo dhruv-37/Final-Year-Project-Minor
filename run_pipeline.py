@@ -32,8 +32,8 @@ from sklearn.metrics import precision_recall_curve, roc_auc_score, roc_curve
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
 from deep_models import TemporalMember  # noqa: E402
 from evaluate import (BOOT_METRICS, bootstrap_period, decision_metrics, period_mean,  # noqa: E402
-                      per_year_metrics)
-from explain import explain_all  # noqa: E402
+                      per_year_metrics, rank_norm)
+from explain import explain_all, explain_temporal  # noqa: E402
 from features import Winsorizer, engineer, market_features  # noqa: E402
 from models import (TREE_LGBM, TREE_XGB, BalancedBagger, LogReg, RUSBoost, WeightedBagger,  # noqa: E402
                     cv_predict, ensemble_scores, lgbm_factory, make_folds, mask_serial, random_search,
@@ -374,20 +374,26 @@ ex_years = list(range(E + 2, TEST_YEARS[-1] + 1))
 note = ''
 if not ex_years:
     ex_years, note = list(range(2003, 2009)), ' (no test year after the training window: in-sample for this model)'
-log(f'   SHAP on the deployed tree and LR members (not the Temporal Transformer), explained on fiscal '
-    f'years {ex_years[0]}-{ex_years[-1]}{note}')
+log(f'   SHAP on the deployed members, explained on fiscal years {ex_years[0]}-{ex_years[-1]}{note}')
 ex = np.where(np.isin(years, ex_years))[0]
 X_ex = X_all[ex]
 raw_ex = {m: mem[m].predict_proba(X_ex) for m in ENS_MEMBERS}
 raw_ex['TT'] = temporal.predict_scores(D, GVKEY, years, ex)
 pct = np.zeros(len(ex))
+member_ranks = {m: np.zeros(len(ex)) for m in raw_ex}
 for t in ex_years:                     # same recipe as scoring: rank each member within the fiscal year
     k = years[ex] == t
     pct[k] = ensemble_scores([s[k] for s in raw_ex.values()])
+    for m, s in raw_ex.items():
+        member_ranks[m][k] = rank_norm(s[k])
 scores = pd.DataFrame({'risk_percentile': pct, 'risk_score': iso.predict(pct)})
 imp = explain_all(mem, pd.DataFrame(X_ex, columns=POOL), y[ex],
                   df.loc[ex, ['gvkey', 'fyear']].reset_index(drop=True), scores,
                   os.path.join(args.out, 'explain'), seed=args.seed, log=log)
 log('\n   Top-10 features by mean |SHAP|:')
 log(imp.head(10)[['feature', 'mean_abs_shap', 'meaning']].to_string(index=False))
+imp_tt, _ = explain_temporal(temporal, D, GVKEY, years, ex, tr, y[ex], member_ranks, pct, os.path.join(args.out, 'explain'),
+                             seed=args.seed, log=log)
+log('\n   Temporal Transformer, top-10 features by mean |SHAP|:')
+log(imp_tt.head(10)[['feature', 'mean_abs_shap', 'meaning']].to_string(index=False))
 log(f'\nDone in {(time.time() - T0) / 60:.1f} min. Outputs in {args.out}/')

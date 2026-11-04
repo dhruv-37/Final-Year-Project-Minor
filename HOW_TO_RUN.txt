@@ -2,7 +2,7 @@ Explainable accounting-fraud detection (extension of Bao et al., JAR 2020)
 ==========================================================================
 Contents
   README.md                     full write-up: what changed vs the paper, results, limitations
-  presentation/                 Fraud_Detection_Project.pptx (+ .pdf copy): 28 slides with speaker notes
+  presentation/                 Fraud_Detection_Project.pptx (+ .pdf copy): 30 slides with speaker notes
   run_pipeline.py, src/         the pipeline (features, models, evaluation, SHAP)
   score_new_data.py, scripts/   scorer for new firms + 20-firm smoke test
   data/                         data_FraudDetection_JAR2020.csv (public, from github.com/JarFraud/FraudDetection)

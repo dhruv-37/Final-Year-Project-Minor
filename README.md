@@ -29,7 +29,7 @@ Flags: `--final_train_end 2010` (last fiscal year the deployable model trains on
 | Decision step | ranking only | precision / recall / lift at a 1%, 2%, 5% investigation budget + confusion matrix at 1%; isotonic-calibrated `fraud_probability` |
 | Significance | – | paired bootstrap (1000 resamples) clustered by AAER case and by firm, for AUC, NDCG@5% and Sens@5% |
 | Deployable model | – | trained on 1991-2010 only, because AAER labels for later years are still incomplete (test-year frauds fall from 69 in 2003 to 4 in 2014) |
-| Explainability | none | SHAP on the **deployed** tree and LR members (all bags), on a real-base-rate sample of 2012-2014. The Temporal Transformer is not explained. |
+| Explainability | none | SHAP on all four **deployed** members, on a real-base-rate sample of 2012-2014. The Temporal Transformer's explanations were audited: 7 of 8 checks passed, and its global ranking failed the randomisation check, so it is indicative only. |
 | Protocol | expanding window, 2-yr gap, serial-fraud masking | identical |
 
 ## Results (full run, `results/`; mean of yearly metrics; 2013-2014 excluded, they have 11 and 4 frauds)
@@ -187,7 +187,13 @@ The random splits average over different years than the first three rows, so com
 A real user cannot have those labels at scoring time, because AAER labels arrive years later. So 0.8 was
 not claimed from these rows.
 
-## Explainability findings (SHAP on the deployed LGBM+XGB+LR members, 2012-2014, real base rate)
+## Explainability findings (SHAP on the deployed members, 2012-2014, real base rate)
+Every member is explained directly: TreeExplainer on all LightGBM and XGBoost bags, permutation SHAP for
+logistic regression, and expected gradients for the Temporal Transformer. No proxy model is used. Members are
+rank-averaged, so their SHAP values cannot be added together, but `risk_percentile` is exactly the mean of the
+four within-year ranks, and `top_flagged_explained.csv` lists each rank next to the drivers.
+
+### Tree members (LightGBM + XGBoost)
 Top drivers: firm size (`log_sale`, `log_at` and their ranks), security issuance, gross PPE / assets,
 external financing need, investments / assets, depreciation / assets, receivables / sales. Market-value
 volatility is the strongest new market feature, 11th overall.
@@ -197,8 +203,51 @@ carry size. See `results/explain/` (bar, beeswarm, dependence plots, waterfalls,
 `top_flagged_explained.csv` with `risk_percentile` + calibrated `risk_score`).
 Caveat: SHAP explains what the model uses, not why a firm committed fraud; labels are SEC-enforced
 cases only (undetected fraud is labelled 0, and 2011+ labels are still being discovered).
-The Temporal Transformer is one of four ranked members and SHAP does not cover it, so
-`top_flagged_explained.csv` pairs the full ensemble's risk score with drivers from the tree members.
+
+### Temporal Transformer
+**Method.** Expected gradients (Erion et al. 2021), the method behind `shap.GradientExplainer`, on the same
+3,000 firm-years, with 50 complete-history training firm-years as the reference. The output explained is the
+logit, in the same log-odds units as the tree members. Only reported values get attribution: a firm-year's
+missing-value flags and absent years stay fixed, so the method does not measure what being missing contributes.
+
+**Findings.** See `temporal_shap_*` and `waterfall_tt_*` in `results/explain/`.
+* Top features: rank of sales, the loss flag, ranks of depreciation / assets, Altman Z, retained earnings /
+  assets and soft assets. Five of its top 10 are in the tree members' top 10 (ranks of sales, assets, PPE,
+  issuance and depreciation). The loss flag, Altman Z, retained earnings and soft assets are not.
+* Share of attribution by year, t-4 to t: 9%, 12%, 17%, 23%, 38%. Part of this slope comes from older years
+  existing for fewer firm-years (t-4 for 58%), but it remains among firm-years that have the year: mean size
+  0.157, 0.191, 0.227, 0.271, 0.383.
+
+**Audit.** [Protocol 4](experiments/PROTOCOL_SHAP.md) set the checks and limits before any attribution was computed.
+Seven of eight passed, so the audit as a whole did not pass.
+
+| | Check | Result | Limit | Verdict |
+|---|---|---|---|---|
+| A | Known answer on a linear network; missing cells get nothing | error 4.8e-07; exactly 0 | below 1e-4; exactly 0 | Pass |
+| B | Same output as the deployed network; same firm ranking | gap 9.5e-07; Spearman 0.997 | below 1e-4; at least 0.99 | Pass |
+| C | Attributions add up to the output (error in output SDs) | median 0.004; 99th percentile 0.020 | 0.01; 0.05 | Pass |
+| D | Agrees with permutation and exact Shapley on 300 rows | global 0.986; within firm-year 0.974; year-share gap 0.037 | 0.80; 0.80; 0.05 | Pass |
+| E | Stable across reference samples; across the 3 networks | 0.984; 0.806 | 0.95; 0.70 | Pass |
+| F | Resetting a row's top 20 cells lowers the logit, against 20 random cells | 0.962 vs 0.018 (53.6 times); CI of the difference [0.919, 0.970] | 2 times; above 0 | Pass |
+| **G** | **Global importance against re-initialised weights; shuffled labels** | **0.425; 0.179** | **0.30; 0.50** | **Fail** |
+| H | Same result on a repeat run | difference 0.0 | below 1e-3 | Pass |
+
+**What the failure means.** An untrained network shares part of the real model's global feature ordering.
+A follow-up on 10 random networks, chosen after seeing the failure so it cannot overturn it, gave the following
+(`experiments/audit_temporal_shap_g.py`):
+* Global ranking: mean Spearman 0.35 (range 0.22 to 0.51). How much each input varies does not explain this.
+  Why it happens is not established.
+* Within a firm-year: median correlation with the real attributions of -0.03. Resetting the 20 cells a random
+  network picks raises the real model's logit by 0.09 on average, while the real attributions' 20 lower it by 0.96.
+
+So explanations of an individual firm-year depend on the trained model and change its output, and they are the
+ones to rely on. The Transformer's global feature ranking is stable and agrees with a second method, but it
+is indicative only. The sample has 5 frauds, so these checks show how faithfully the model is explained and
+say nothing about why any firm committed fraud.
+
+**Effect on the model.** None. The rerun's model scores, metrics and tree SHAP values are identical to before.
+It exposed one existing problem, now fixed: the unseeded logistic regression SHAP column changed on every run
+(by up to 0.005, Spearman 0.999), and it is now seeded. That column is not used by any plot or score.
 
 ## Scoring new firms
 `score_new_data.py` ranks the input firms against the **full market cross-section of the same
