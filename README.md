@@ -91,12 +91,12 @@ at least 0.002 CV AUC, then show a significant test gain that holds on all seeds
 | + Temporal Mamba | +0.0041 | 0.738 | 0.080 | 0.150 | Passed, weaker; not added to the ensemble |
 | + FT-Transformer | −0.0036 | 0.728 | 0.073 | 0.136 | Rejected |
 | + TabM | −0.0026 | 0.726 | 0.076 | 0.139 | Rejected |
-| + Mambular | −0.0011 | not run | not run | not run | Rejected at validation |
+| + Mambular | −0.0011 | 0.729 | 0.069 | 0.130 | Rejected |
 | Dynamic RFE (94 features in CV, re-selected per window) | +0.0003 | 0.733 | 0.074 | 0.139 | Rejected |
 | Focal PU XGBoost replacing XGBoost | +0.0005 | 0.731 | 0.080 | 0.146 | Rejected |
 
 * The adopted gain is AUC **+0.0084** (95% CI [+0.0036, +0.0135], p = 0.003). It is positive on all
-  3 seeds and in both sub-periods, but its Holm-adjusted p is 0.09, which is why it is labelled
+  3 seeds and in both sub-periods, but its Holm-adjusted p is 0.11, which is why it is labelled
   "promising, not confirmed". The NDCG@5% (+0.003) and Sens@5% (+0.007) gains are not significant.
 * Only the models that read a firm's history help. Feature-token FT-Transformer, Mambular and TabM
   do not beat the trees on single-year features, in line with recent tabular benchmarks.

@@ -23,9 +23,25 @@
     "passing_metrics": [],
     "survives_holm": false
   },
+  "mambular_alone": {
+    "adopt": false,
+    "cv_gain": -0.0567,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  },
   "reference+ftt": {
     "adopt": false,
     "cv_gain": -0.0036,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  },
+  "reference+mambular": {
+    "adopt": false,
+    "cv_gain": -0.0011,
     "gate": false,
     "harm": true,
     "passing_metrics": [],
