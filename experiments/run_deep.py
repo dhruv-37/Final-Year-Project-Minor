@@ -137,7 +137,7 @@ def stage_test(archs):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--stage', choices=['cv', 'test'], required=True)
-    ap.add_argument('--arch', nargs='+', default=list(ARCH))
+    ap.add_argument('--arch', nargs='+', default=list(SPACE))
     a = ap.parse_args()
     ctx()
     (stage_cv if a.stage == 'cv' else stage_test)(a.arch)

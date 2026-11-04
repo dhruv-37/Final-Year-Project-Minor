@@ -191,9 +191,24 @@ class TemporalMamba(_Temporal):
         return self.head(z[:, -1]).squeeze(-1)
 
 
+class GatedTemporalTransformer(TemporalTransformer):
+    """Temporal Transformer that weights each feature per firm-year before encoding it, after the
+    variable selection network of Temporal Fusion Transformers (Lim et al. 2021)."""
+
+    def __init__(self, n_features, gate='softmax', d=64, n_layers=2, heads=4, dropout=0.1, seq_len=5):
+        super().__init__(n_features, d, n_layers, heads, dropout, seq_len)
+        self.gate, self.n_features = gate, n_features
+        self.gate_net = nn.Sequential(nn.Linear(2 * n_features, d), nn.ReLU(), nn.Linear(d, n_features))
+
+    def forward(self, x, m, p):
+        w = self.gate_net(torch.cat([x, m], -1))
+        w = F.softmax(w, -1) * self.n_features if self.gate == 'softmax' else torch.sigmoid(w)
+        return super().forward(x * w, m, p)
+
+
 ARCH = {'ftt': FTTransformer, 'mambular': Mambular, 'tabm': TabM,
-        'temp_trans': TemporalTransformer, 'temp_mamba': TemporalMamba}
-TEMPORAL = ('temp_trans', 'temp_mamba')
+        'temp_trans': TemporalTransformer, 'temp_mamba': TemporalMamba, 'gated_tt': GatedTemporalTransformer}
+TEMPORAL = ('temp_trans', 'temp_mamba', 'gated_tt')
 
 
 def history_index(gvkey, years, k=5):
