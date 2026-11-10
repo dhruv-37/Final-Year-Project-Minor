@@ -136,6 +136,22 @@ These 10 families are what was tried, not every method that exists. The code for
 other rejected methods was removed after testing; it is in git history at commit `255e803`, and
 their scores remain in `results/experiments/`.
 
+**Is it at least no worse?** A second test, [Protocol 6](experiments/PROTOCOL_NI.md), asked a different
+question: can selection run inside every window without losing AUC? The best setting above (pool of 140
++ 60 history features, DRFE) was run on the test years against the current model, with a margin of
+0.003 AUC fixed in advance. It is exploratory, because the test years were used before.
+
+| | Fixed 140 | Dynamic | Change (95% CI) |
+|---|---|---|---|
+| ROC AUC, 2003-2012 | 0.7484 | 0.7493 | +0.0008 (−0.0043 to +0.0062) |
+| NDCG@5% | 0.0836 | 0.0817 | −0.0020 (−0.0146 to +0.0080) |
+
+The verdict is **inconclusive**: the point estimate is about zero, but the interval does not rule out a
+loss larger than 0.003. The pipeline therefore keeps the fixed pool. The selector also chose between 59
+and 200 features for the same window depending on the seed, because validation AUC is nearly flat along
+the elimination path. The honest summary is that dynamic selection makes no measurable difference
+either way, and adds cost and instability.
+
 ### Automatic feature generation: tried, did not raise ROC
 Selection only chooses among existing features, so the next question was whether new features could be
 built automatically inside each training window. [Protocol 5](experiments/PROTOCOL_FG.md) fixed the rules
