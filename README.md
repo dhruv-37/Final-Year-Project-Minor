@@ -136,6 +136,28 @@ These 10 families are what was tried, not every method that exists. The code for
 other rejected methods was removed after testing; it is in git history at commit `255e803`, and
 their scores remain in `results/experiments/`.
 
+### Automatic feature generation: tried, did not raise ROC
+Selection only chooses among existing features, so the next question was whether new features could be
+built automatically inside each training window. [Protocol 5](experiments/PROTOCOL_FG.md) fixed the rules
+before any run. The method is an own implementation of OpenFE's expand-and-reduce (Zhang et al., ICML
+2023), because the published package does not respect time order.
+* **Expand.** All 1,134 ratios and asset-scaled differences of the 28 raw items, each as a within-year
+  rank. G2 adds a recursive second round on the best 25: the change from last year, the deviation from
+  the firm's own 3-year mean, and ratios between them.
+* **Reduce.** Boosting from the current model's margin on two inner folds that keep the 2-year gap, with
+  successive halving, then ranking by split gain. The top k go to LGBM, XGB and LR.
+
+| Setting | Gain, seed 42 | Gain, fresh seeds 43-44 (needed +0.002) |
+|---|---|---|
+| G1, one round, k = 10 / 25 / 50 | −0.0000 / +0.0002 / −0.0027 | k = 25: −0.0009 |
+| G2, two rounds, k = 10 / 25 / 50 | −0.0021 / +0.0005 / −0.0026 | k = 25: −0.0018 |
+
+Neither family passed, so the test years were not used. G1 raised NDCG@5% and Sens@5% on the fresh seeds,
+but the rule decides on AUC and this was not tested further. Described after the result: the chosen
+features change almost completely between windows and between seeds (Jaccard overlap 0.02 to 0.17), and
+none was chosen in all 9 runs. With about 900 frauds, picking ratios out of over a thousand candidates is
+mostly noise. LLM-proposed features (CAAFE) were not tried, because they need an external API.
+
 ### Raising ROC AUC towards 0.8: reached 0.748, not 0.8
 Rules were fixed in advance (`experiments/PROTOCOL_AUC.md`, `experiments/PROTOCOL_TEXT.md`). The test
 years had been used before, so these results are **exploratory**. The reference is the previous

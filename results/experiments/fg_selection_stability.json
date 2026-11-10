@@ -1,0 +1,82 @@
+{
+  "G1": {
+    "jaccard_same_window_other_seed": 0.16929612974034863,
+    "jaccard_same_seed_other_window": 0.05831182510572722,
+    "in_all_9": [],
+    "most_common": [
+      [
+        "r:invt/che",
+        6
+      ],
+      [
+        "r:csho/sstk",
+        4
+      ],
+      [
+        "r:ib/che",
+        4
+      ],
+      [
+        "r:sstk/dlc",
+        4
+      ],
+      [
+        "r:lct/che",
+        4
+      ],
+      [
+        "r:rect/che",
+        4
+      ],
+      [
+        "r:che/dltis",
+        4
+      ],
+      [
+        "r:sstk/txp",
+        3
+      ]
+    ],
+    "round2_share": 0.0
+  },
+  "G2": {
+    "jaccard_same_window_other_seed": 0.07536136771031146,
+    "jaccard_same_seed_other_window": 0.018329554043839756,
+    "in_all_9": [],
+    "most_common": [
+      [
+        "r:csho/dp",
+        5
+      ],
+      [
+        "r:ib/che",
+        3
+      ],
+      [
+        "r:lct/che",
+        3
+      ],
+      [
+        "q:r:lt/ppegt|d:dp-sstk",
+        3
+      ],
+      [
+        "r:lt/ppegt",
+        3
+      ],
+      [
+        "r:lct/txt",
+        2
+      ],
+      [
+        "r:sstk/txp",
+        2
+      ],
+      [
+        "r:csho/sstk",
+        2
+      ]
+    ],
+    "round2_share": 0.5466666666666666
+  }
+}
