@@ -157,6 +157,8 @@ but the rule decides on AUC and this was not tested further. Described after the
 features change almost completely between windows and between seeds (Jaccard overlap 0.02 to 0.17), and
 none was chosen in all 9 runs. With about 900 frauds, picking ratios out of over a thousand candidates is
 mostly noise. LLM-proposed features (CAAFE) were not tried, because they need an external API.
+The code was removed after testing; it is in git history at commit `5628dd9`, and the scores remain in
+`results/experiments/` (`cv_fg*.json`).
 
 ### Raising ROC AUC towards 0.8: reached 0.748, not 0.8
 Rules were fixed in advance (`experiments/PROTOCOL_AUC.md`, `experiments/PROTOCOL_TEXT.md`). The test

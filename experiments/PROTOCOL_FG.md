@@ -107,3 +107,5 @@ the verdict. It was not tested on the test years and is not claimed.
 
 This fits the gains being at noise level: about 900 frauds leave too little signal to pick ratios
 reliably out of more than a thousand candidates.
+
+The runner, `experiments/run_fg.py`, was removed after this result. It is in git history at commit `5628dd9`.
