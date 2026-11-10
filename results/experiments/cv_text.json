@@ -1,0 +1,47 @@
+{
+  "reference": 0.7723070866537157,
+  "reference_linked": 0.7707856537944529,
+  "candidates": [
+    {
+      "setting": "T2n",
+      "screen_gain": 0.001720048966705079,
+      "gain": 0.0014251527897235494,
+      "gain_linked": 0.00228069617067439,
+      "placebo_gain": -0.0028694109782900767,
+      "gate": false
+    },
+    {
+      "setting": "T4",
+      "screen_gain": 0.0001929503300197588,
+      "gain": 0.0004424283508643878,
+      "gain_linked": 0.0006427498826506728,
+      "placebo_gain": -0.00013817934295978773,
+      "gate": false
+    },
+    {
+      "setting": "T1+T2p+T3+T4",
+      "screen_gain": 0.0004770732774563857,
+      "gain": -9.577341536703976e-05,
+      "gain_linked": 0.0003696362002995057,
+      "placebo_gain": -0.0002707422283835248,
+      "gate": false
+    },
+    {
+      "setting": "T1",
+      "screen_gain": 0.00020552622681291322,
+      "gain": -0.0002183445377846871,
+      "gain_linked": -0.0007489656670821576,
+      "placebo_gain": 0.0025882354212549696,
+      "gate": false
+    },
+    {
+      "setting": "T3",
+      "screen_gain": -0.0008008712980047683,
+      "gain": -0.0005602172708968345,
+      "gain_linked": -0.0004123680824948961,
+      "placebo_gain": 0.0008875404771311324,
+      "gate": false
+    }
+  ],
+  "frozen": []
+}

@@ -1,0 +1,102 @@
+{
+  "DRFE_tau0.02_one_se": {
+    "adopt": false,
+    "cv_gain": 0.0003,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  },
+  "PU_pi0.01_g3.0_replace": {
+    "adopt": false,
+    "cv_gain": 0.0005,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  },
+  "ftt_alone": {
+    "adopt": false,
+    "cv_gain": -0.0701,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  },
+  "mambular_alone": {
+    "adopt": false,
+    "cv_gain": -0.0567,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  },
+  "reference+ftt": {
+    "adopt": false,
+    "cv_gain": -0.0036,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  },
+  "reference+mambular": {
+    "adopt": false,
+    "cv_gain": -0.0011,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  },
+  "reference+tabm": {
+    "adopt": false,
+    "cv_gain": -0.0026,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  },
+  "reference+temp_mamba": {
+    "adopt": true,
+    "cv_gain": 0.0041,
+    "gate": true,
+    "harm": false,
+    "passing_metrics": [
+      "AUC"
+    ],
+    "survives_holm": false
+  },
+  "reference+temp_trans": {
+    "adopt": true,
+    "cv_gain": 0.0126,
+    "gate": true,
+    "harm": false,
+    "passing_metrics": [
+      "AUC"
+    ],
+    "survives_holm": false
+  },
+  "tabm_alone": {
+    "adopt": false,
+    "cv_gain": -0.0444,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  },
+  "temp_mamba_alone": {
+    "adopt": false,
+    "cv_gain": -0.0131,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  },
+  "temp_trans_alone": {
+    "adopt": false,
+    "cv_gain": -0.0023,
+    "gate": false,
+    "harm": true,
+    "passing_metrics": [],
+    "survives_holm": false
+  }
+}

@@ -57,6 +57,11 @@ GLOSSARY = {
     'ch_roa': 'Change in ROA (paper)', 'issue': 'Security issuance flag', 'bm': 'Book-to-market',
     'dpi': 'Depreciation index (paper)', 'reoa': 'Retained earnings / assets',
     'EBIT': 'EBIT / assets', 'ch_fcf': 'Change in free cash flow',
+    # market behaviour
+    'mkt_g': 'Growth in market value of equity', 'mkt_g_lag': 'Growth in market value of equity, previous year',
+    'mkt_g3': 'Market value of equity growth over 3 years', 'mkt_vol': 'Volatility of market value growth, up to 4 years',
+    'shares_g': 'Growth in shares outstanding', 'mkt_vs_assets': 'Market value growth minus asset growth',
+    'mkt_vs_sales': 'Market value growth minus sales growth',
 }
 
 
@@ -164,6 +169,24 @@ def engineer(df: pd.DataFrame):
         'enhanced_rank': RATIOS14 + list(f.columns) + list(ranks.columns),
     }
     return out, groups
+
+
+def market_features(D, gvkey, years):
+    """Within-year ranks of how a firm's market value moved. Uses the firm's unbroken run of earlier
+    years and the same year's cross-section only. D holds the raw items; rows sorted by firm, then year."""
+    spell = np.cumsum(np.r_[True, (gvkey[1:] != gvkey[:-1]) | (years[1:] != years[:-1] + 1)])
+    d = D.reset_index(drop=True)
+    mve = (d['prcc_f'] * d['csho']).where(lambda s: s > 0)
+    g = mve.groupby(spell)
+    mve_g = mve / g.shift(1) - 1
+    asset_g = d['at'] / d['at'].groupby(spell).shift(1) - 1
+    sale_g = d['sale'] / d['sale'].groupby(spell).shift(1) - 1
+    raw = {'mkt_g': mve_g, 'mkt_g_lag': mve_g.groupby(spell).shift(1), 'mkt_g3': mve / g.shift(3) - 1,
+           'mkt_vol': mve_g.groupby(spell).rolling(4, min_periods=2).std().reset_index(level=0, drop=True).sort_index(),
+           'shares_g': d['csho'] / d['csho'].groupby(spell).shift(1) - 1, 'mkt_vs_assets': mve_g - asset_g,
+           'mkt_vs_sales': mve_g - sale_g}
+    return pd.DataFrame({k + '_yr': v.replace([np.inf, -np.inf], np.nan).groupby(years).rank(pct=True)
+                         for k, v in raw.items()}).astype(np.float32)
 
 
 class Winsorizer:

@@ -1,0 +1,100 @@
+﻿{'rows': 141463, 'violations': 0, 'mean_history_len': 3.5718102966853524}
+18 of 18 tasks to run (5 workers x 3 threads)
+  done audit\placebo_row_temp_trans_val1999_s9.pkl [15s]
+  done audit\placebo_row_temp_trans_val1999_s7.pkl [15s]
+  done audit\placebo_row_temp_trans_val1999_s8.pkl [15s]
+  done audit\placebo_row_temp_trans_val2000_s7.pkl [16s]
+  done audit\placebo_row_temp_trans_val2000_s8.pkl [16s]
+  done audit\placebo_row_temp_mamba_val1999_s7.pkl [10s]
+  done audit\placebo_row_temp_trans_val2000_s9.pkl [13s]
+  done audit\placebo_row_temp_trans_val2001_s7.pkl [15s]
+  done audit\placebo_row_temp_trans_val2001_s8.pkl [15s]
+  done audit\placebo_row_temp_trans_val2001_s9.pkl [15s]
+  done audit\placebo_row_temp_mamba_val1999_s8.pkl [12s]
+  done audit\placebo_row_temp_mamba_val1999_s9.pkl [13s]
+  done audit\placebo_row_temp_mamba_val2000_s7.pkl [15s]
+  done audit\placebo_row_temp_mamba_val2000_s8.pkl [15s]
+  done audit\placebo_row_temp_mamba_val2000_s9.pkl [15s]
+  done audit\placebo_row_temp_mamba_val2001_s7.pkl [16s]
+  done audit\placebo_row_temp_mamba_val2001_s8.pkl [15s]
+  done audit\placebo_row_temp_mamba_val2001_s9.pkl [12s]
+temp_trans {
+ "placebo_auc": {
+  "val1999": [
+   0.5327864696875982,
+   0.5595124869452359,
+   0.4747645072650396
+  ],
+  "val2000": [
+   0.553553611175071,
+   0.5595559555955595,
+   0.48869305535204677
+  ],
+  "val2001": [
+   0.48521211334988334,
+   0.49232940417995874,
+   0.6143926126412991
+  ]
+ },
+ "placebo_mean": 0.5289778017990769,
+ "first_time": {
+  "reference": {
+   "all": 0.7596816174997949,
+   "first_time": 0.756617381217957,
+   "frauds": 240,
+   "first_time_frauds": 231
+  },
+  "temp_trans": {
+   "all": 0.7573702404382806,
+   "first_time": 0.7532674111120522,
+   "frauds": 240,
+   "first_time_frauds": 231
+  },
+  "reference+temp_trans": {
+   "all": 0.7723070866537157,
+   "first_time": 0.7690279127573992,
+   "frauds": 240,
+   "first_time_frauds": 231
+  }
+ }
+}
+temp_mamba {
+ "placebo_auc": {
+  "val1999": [
+   0.5629437352341745,
+   0.5109599180718494,
+   0.4708475710534054
+  ],
+  "val2000": [
+   0.5396754791758246,
+   0.5920708349904757,
+   0.5270201438748526
+  ],
+  "val2001": [
+   0.5288789824691751,
+   0.583484190022427,
+   0.6026955682530697
+  ]
+ },
+ "placebo_mean": 0.5465084914605838,
+ "first_time": {
+  "reference": {
+   "all": 0.7596816174997949,
+   "first_time": 0.756617381217957,
+   "frauds": 240,
+   "first_time_frauds": 231
+  },
+  "temp_mamba": {
+   "all": 0.7465699994619195,
+   "first_time": 0.7478518641121094,
+   "frauds": 240,
+   "first_time_frauds": 231
+  },
+  "reference+temp_mamba": {
+   "all": 0.7638161065559528,
+   "first_time": 0.7619232744239456,
+   "frauds": 240,
+   "first_time_frauds": 231
+  }
+ }
+}

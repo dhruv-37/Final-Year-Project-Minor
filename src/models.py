@@ -42,6 +42,36 @@ class BalancedBagger:
         return np.mean([m.predict_proba(X)[:, 1] for m in self.models_], axis=0)
 
 
+class WeightedBagger(BalancedBagger):
+    """BalancedBagger whose models also take per-row weights."""
+
+    def fit(self, X, y, w):
+        X, y = np.asarray(X, dtype=np.float32), np.asarray(y)
+        rng = np.random.RandomState(self.seed)
+        pos, neg = np.where(y == 1)[0], np.where(y == 0)[0]
+        n_neg = min(len(neg), int(self.ratio * len(pos)))
+        self.models_ = []
+        for b in range(self.n_bags):
+            idx = np.concatenate([pos, rng.choice(neg, n_neg, replace=False)])
+            self.models_.append(self.make_model(self.seed + b).fit(X[idx], y[idx], sample_weight=w[idx]))
+        self.make_model = None
+        return self
+
+
+def recency_weights(years, half_life=3):
+    """A training row counts half as much for every `half_life` years before the window's newest year."""
+    return 0.5 ** ((years.max() - years) / half_life)
+
+
+# Frozen in experiments/PROTOCOL_AUC.md (40 random trials each, chosen by the full ensemble's validation AUC).
+TREE_LGBM = dict(n_estimators=289, learning_rate=0.03712427690496493, num_leaves=14, min_child_samples=38,
+                 colsample_bytree=0.7944652393690805, subsample=0.999009171505687, reg_lambda=0.1482751814796408,
+                 ratio=20)
+TREE_XGB = dict(n_estimators=377, learning_rate=0.023878611876213943, max_depth=6, min_child_weight=2.3525101989157204,
+                colsample_bytree=0.6085690181622551, subsample=0.6385433505353215, reg_lambda=0.4051966406965344,
+                ratio=20)
+
+
 # ------------------------------------------------------------------ factories
 def lgbm_factory(p, n_jobs=-1):
     def make(seed):

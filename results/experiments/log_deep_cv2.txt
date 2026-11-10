@@ -1,0 +1,51 @@
+﻿0 of 90 tasks to run (5 workers x 3 threads)
+extending to (30, 40, 50, 60) {'ftt': 1, 'mambular': 1}
+6 of 6 tasks to run (5 workers x 3 threads)
+  done deep\long_ftt_t1_val1999_s42.pkl [407s]
+  done deep\long_ftt_t1_val2000_s42.pkl [508s]
+  done deep\long_ftt_t1_val2001_s42.pkl [608s]
+  done deep\long_mambular_t1_val1999_s42.pkl [1571s]
+  done deep\long_mambular_t1_val2000_s42.pkl [1784s]
+  done deep\long_mambular_t1_val2001_s42.pkl [1652s]
+ftt tuning best {'trial': 1, 'epochs': 20, 'cv_auc': 0.6995962229827241} ({'d': 32, 'n_layers': 2, 'dropout': 0.2}, {'lr': 0.002, 'weight_decay': 0.001, 'ratio': 3}) [{'trial': 1, 'epochs': 30, 'cv_auc': 0.6889056158264132}, {'trial': 1, 'epochs': 40, 'cv_auc': 0.6694914136519857}, {'trial': 1, 'epochs': 50, 'cv_auc': 0.6228000450274421}, {'trial': 1, 'epochs': 60, 'cv_auc': 0.6310206464376524}]
+mambular tuning best {'trial': 1, 'epochs': 20, 'cv_auc': 0.6992782712010447} ({'d': 16, 'n_layers': 1, 'd_state': 8, 'dropout': 0.3}, {'lr': 0.002, 'weight_decay': 0.001, 'ratio': 10}) [{'trial': 1, 'epochs': 30, 'cv_auc': 0.6834114905610301}, {'trial': 1, 'epochs': 40, 'cv_auc': 0.6527026100705933}, {'trial': 1, 'epochs': 50, 'cv_auc': 0.6486800127243478}, {'trial': 1, 'epochs': 60, 'cv_auc': 0.6095367501766609}]
+tabm tuning best {'trial': 2, 'epochs': 15, 'cv_auc': 0.7167905184379961} ({'d': 16, 'width': 256, 'n_layers': 2, 'dropout': 0.2}, {'lr': 0.001, 'weight_decay': 0.001, 'ratio': 10}) []
+temp_trans tuning best {'trial': 0, 'epochs': 15, 'cv_auc': 0.768917726568258} ({'d': 32, 'n_layers': 2, 'dropout': 0.2}, {'lr': 0.001, 'weight_decay': 1e-05, 'ratio': 10}) []
+temp_mamba tuning best {'trial': 1, 'epochs': 10, 'cv_auc': 0.7382891574879515} ({'d': 64, 'n_layers': 1, 'd_state': 8, 'dropout': 0.3}, {'lr': 0.002, 'weight_decay': 0.001, 'ratio': 5}) []
+30 of 30 tasks to run (5 workers x 3 threads)
+  done deep\final_ftt_val1999_s44.pkl [102s]
+  done deep\final_ftt_val1999_s43.pkl [102s]
+  done deep\final_ftt_val2000_s43.pkl [147s]
+  done deep\final_ftt_val2000_s44.pkl [147s]
+  done deep\final_ftt_val2001_s43.pkl [190s]
+  done deep\final_ftt_val2001_s44.pkl [246s]
+  done deep\final_mambular_val1999_s43.pkl [772s]
+  done deep\final_mambular_val1999_s44.pkl [807s]
+  done deep\final_mambular_val2000_s43.pkl [992s]
+  done deep\final_tabm_val1999_s43.pkl [219s]
+  done deep\final_mambular_val2000_s44.pkl [997s]
+  done deep\final_tabm_val1999_s44.pkl [223s]
+  done deep\final_tabm_val2000_s43.pkl [270s]
+  done deep\final_tabm_val2000_s44.pkl [267s]
+  done deep\final_mambular_val2001_s43.pkl [1152s]
+  done deep\final_temp_trans_val1999_s43.pkl [40s]
+  done deep\final_temp_trans_val1999_s44.pkl [34s]
+  done deep\final_temp_trans_val2000_s43.pkl [39s]
+  done deep\final_temp_trans_val2000_s44.pkl [38s]
+  done deep\final_temp_trans_val2001_s43.pkl [45s]
+  done deep\final_temp_mamba_val1999_s43.pkl [32s]
+  done deep\final_temp_trans_val2001_s44.pkl [48s]
+  done deep\final_tabm_val2001_s43.pkl [263s]
+  done deep\final_temp_mamba_val1999_s44.pkl [31s]
+  done deep\final_temp_mamba_val2000_s43.pkl [35s]
+  done deep\final_temp_mamba_val2000_s44.pkl [34s]
+  done deep\final_temp_mamba_val2001_s43.pkl [37s]
+  done deep\final_tabm_val2001_s44.pkl [239s]
+  done deep\final_temp_mamba_val2001_s44.pkl [36s]
+  done deep\final_mambular_val2001_s44.pkl [858s]
+reference {'cv_auc': 0.7596816174997949, 'cv_ndcg5': 0.19340836052157953, 'cv_sens5': 0.25620790873348304, 'fold_auc': {'val1999': 0.7294272127191426, 'val2000': 0.7519798491477054, 'val2001': 0.7976377906325367}}
+ftt alone 0.6895900170400345 with reference 0.7560701920778023 gate False
+mambular alone 0.7030060757065529 with reference 0.7586055168301963 gate False
+tabm alone 0.7153209786265133 with reference 0.7570601325746905 gate False
+temp_trans alone 0.7573702404382804 with reference 0.7723070866537157 gate True
+temp_mamba alone 0.7465699994619195 with reference 0.7638161065559528 gate True

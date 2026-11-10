@@ -1,0 +1,60 @@
+﻿coverage {'val1999': {'linked_nonfraud': 0.8060695780903034, 'linked_fraud': 0.958904109589041, 'flag_only_auc': 0.5764172657493688}, 'val2000': {'linked_nonfraud': 0.7953795379537953, 'linked_fraud': 0.9302325581395349, 'flag_only_auc': 0.5674265100928697}, 'val2001': {'linked_nonfraud': 0.78331475879637, 'linked_fraud': 0.9506172839506173, 'flag_only_auc': 0.5836512625771236}}
+45 of 108 tasks to run (5 workers x 3 threads)
+  done text\member\T2n_val1999_LR_s42.pkl [7s]
+  done text\member\T2n_val2000_LR_s42.pkl [8s]
+  done text\member\T2n_val1999_LGBM_s42.pkl [17s]
+  done text\member\T2n_val2000_LGBM_s42.pkl [18s]
+  done text\member\T2n_val2001_LR_s42.pkl [9s]
+  done text\member\T2n_val2001_LGBM_s42.pkl [23s]
+  done text\member\T2p_val1999_LGBM_s42.pkl [22s]
+  done text\member\T2p_val1999_LR_s42.pkl [7s]
+  done text\member\T2p_val2000_LGBM_s42.pkl [20s]
+  done text\member\T2n_val1999_XGB_s42.pkl [115s]
+  done text\member\T2p_val2000_LR_s42.pkl [10s]
+  done text\member\T2n_val2000_XGB_s42.pkl [132s]
+  done text\member\T2p_val2001_LGBM_s42.pkl [25s]
+  done text\member\T2p_val2001_LR_s42.pkl [11s]
+  done text\member\T2p_val1999_XGB_s42.pkl [128s]
+  done text\member\T2n_val2001_XGB_s42.pkl [150s]
+  done text\member\T1+T2n_val1999_LR_s42.pkl [11s]
+  done text\member\T1+T2n_val1999_LGBM_s42.pkl [21s]
+  done text\member\T1+T2n_val2000_LGBM_s42.pkl [26s]
+  done text\member\T1+T2n_val2000_LR_s42.pkl [14s]
+  done text\member\T2p_val2000_XGB_s42.pkl [147s]
+  done text\member\T1+T2n_val2001_LGBM_s42.pkl [23s]
+  done text\member\T1+T2n_val2001_LR_s42.pkl [13s]
+  done text\member\T1+T2p_val1999_LGBM_s42.pkl [19s]
+  done text\member\T2p_val2001_XGB_s42.pkl [167s]
+  done text\member\T1+T2p_val1999_LR_s42.pkl [11s]
+  done text\member\T1+T2n_val1999_XGB_s42.pkl [147s]
+  done text\member\T1+T2p_val2000_LGBM_s42.pkl [21s]
+  done text\member\T1+T2p_val2000_LR_s42.pkl [12s]
+  done text\member\T1+T2n_val2000_XGB_s42.pkl [165s]
+  done text\member\T1+T2p_val2001_LGBM_s42.pkl [21s]
+  done text\member\T1+T2p_val2001_LR_s42.pkl [14s]
+  done text\member\T1+T2p+T3+T4_val1999_LGBM_s42.pkl [19s]
+  done text\member\T1+T2n_val2001_XGB_s42.pkl [181s]
+  done text\member\T1+T2p+T3+T4_val1999_LR_s42.pkl [9s]
+  done text\member\T1+T2p_val1999_XGB_s42.pkl [150s]
+  done text\member\T1+T2p+T3+T4_val2000_LGBM_s42.pkl [21s]
+  done text\member\T1+T2p+T3+T4_val2000_LR_s42.pkl [12s]
+  done text\member\T1+T2p+T3+T4_val2001_LGBM_s42.pkl [23s]
+  done text\member\T1+T2p_val2000_XGB_s42.pkl [170s]
+  done text\member\T1+T2p+T3+T4_val2001_LR_s42.pkl [13s]
+  done text\member\T1+T2p_val2001_XGB_s42.pkl [182s]
+  done text\member\T1+T2p+T3+T4_val1999_XGB_s42.pkl [133s]
+  done text\member\T1+T2p+T3+T4_val2000_XGB_s42.pkl [148s]
+  done text\member\T1+T2p+T3+T4_val2001_XGB_s42.pkl [146s]
+reference 0.7743127008185532 linked 0.7727640574858836
+T2n gain +0.0017 linked +0.0026
+T2p gain +0.0006 linked +0.0013
+T1+T2p+T3+T4 gain +0.0005 linked +0.0011
+T1+T2n gain +0.0004 linked +0.0013
+T1 gain +0.0002 linked -0.0004
+T4 gain +0.0002 linked +0.0003
+T1+T2p gain -0.0004 linked -0.0001
+T3 gain -0.0008 linked -0.0008
+T1+T2 gain -0.0112 linked -0.0112
+T2 gain -0.0115 linked -0.0108
+T1+T2+T3 gain -0.0115 linked -0.0114
+T1+T2+T3+T4 gain -0.0116 linked -0.0115

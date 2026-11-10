@@ -6,4 +6,5 @@ pandas==3.0.6
 scikit-learn==1.9.1
 scipy==1.18.1
 shap==0.54.1
+torch==2.15.0
 xgboost==3.4.1

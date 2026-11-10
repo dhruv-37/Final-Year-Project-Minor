@@ -1,0 +1,30 @@
+{
+  "LGBM": {
+    "best_trial": 29,
+    "auc": 0.778408092086786,
+    "params": {
+      "n_estimators": 289,
+      "learning_rate": 0.03712427690496493,
+      "num_leaves": 14,
+      "min_child_samples": 38,
+      "colsample_bytree": 0.7944652393690805,
+      "subsample": 0.999009171505687,
+      "reg_lambda": 0.1482751814796408,
+      "ratio": 20
+    }
+  },
+  "XGB": {
+    "best_trial": 38,
+    "auc": 0.7764339294294927,
+    "params": {
+      "n_estimators": 377,
+      "learning_rate": 0.023878611876213943,
+      "max_depth": 6,
+      "min_child_weight": 2.3525101989157204,
+      "colsample_bytree": 0.6085690181622551,
+      "subsample": 0.6385433505353215,
+      "reg_lambda": 0.4051966406965344,
+      "ratio": 20
+    }
+  }
+}
