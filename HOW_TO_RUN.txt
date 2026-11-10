@@ -6,7 +6,7 @@ Contents
   run_pipeline.py, src/         the pipeline (features, models, evaluation, SHAP)
   score_new_data.py, scripts/   scorer for new firms + 20-firm smoke test
   data/                         data_FraudDetection_JAR2020.csv (public, from github.com/JarFraud/FraudDetection)
-  experiments/                  tests of the adopted model and protocols for all candidates (rejected code: git history, 255e803, f7c0284 and 5628dd9)
+  experiments/                  tests of the adopted model and protocols for all candidates (rejected code: git history, 255e803, f7c0284, 5628dd9 and a05dff8)
   results/                      every number in the README, plus the saved model (final_models.joblib)
   improvements.bundle           the 4 git commits of the improvement work (git fetch improvements.bundle improvements:improvements)
 

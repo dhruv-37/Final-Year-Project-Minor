@@ -86,3 +86,6 @@ across windows and seeds (mean 134, of which 33 are history features), and in 20
 59, 200 and 111. The validation AUC along the elimination path is nearly flat, so the "best" point
 moves with the seed. The subsets are nested, so seeds overlap on the smaller set (mean Jaccard 0.70),
 and 45 features were kept in all 30 runs.
+
+`run_ni.py` and `src/feature_selection.py` were removed after this result; they are in git history at
+commit `a05dff8`.

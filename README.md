@@ -150,7 +150,8 @@ The verdict is **inconclusive**: the point estimate is about zero, but the inter
 loss larger than 0.003. The pipeline therefore keeps the fixed pool. The selector also chose between 59
 and 200 features for the same window depending on the seed, because validation AUC is nearly flat along
 the elimination path. The honest summary is that dynamic selection makes no measurable difference
-either way, and adds cost and instability.
+either way, and adds cost and instability. The code is in git history at commit `a05dff8`, and the
+scores remain in `results/experiments/` (`cv_ni.json`, `ni_test.json`).
 
 ### Automatic feature generation: tried, did not raise ROC
 Selection only chooses among existing features, so the next question was whether new features could be
