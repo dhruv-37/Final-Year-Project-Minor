@@ -1,0 +1,4 @@
+compustat_full_market: rows 16904, frauds 34 | mean yearly AUC 0.812 [0.750, 0.869] over [2012] NDCG@5% 0.063 Sens@5% 0.158 | pooled AUC 0.780 [0.701, 0.849]
+common_rows_compustat_inputs: rows 8874, frauds 22 | pooled AUC 0.701 [0.590, 0.804]
+common_rows_xbrl_inputs: rows 8874, frauds 22 | pooled AUC 0.700 [0.598, 0.788]
+rank correlation between the two sets of scores: 0.844

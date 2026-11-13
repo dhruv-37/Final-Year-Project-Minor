@@ -312,3 +312,30 @@ and `market_size`.
 `score_new_data.py` | `scripts/smoke_score.py` | `experiments/` candidate tests and protocol, with
 outputs in `results/experiments/` | `results/` metrics, decision metrics, calibration, predictions, plots,
 saved model (`final_models.joblib`, git-ignored; regenerate with `run_pipeline.py`)
+
+## Fresh-period test (fiscal 2015-2018, SEC XBRL data, new labels)
+
+Protocol: `experiments/PROTOCOL_FRESH.md`, written before any fresh score existed. Code: `experiments/fresh/`.
+The saved model (trained on fiscal 1991-2010) was scored once, unchanged, on data that is not in the paper's
+file: financials from the SEC's XBRL API as first reported, and fraud labels written by hand from the AAERs
+released 2017-2024 (`experiments/fresh/aaer_labels_fresh.csv`).
+
+| Test | Firm-years | Frauds | AUC | 95% CI |
+|---|---|---|---|---|
+| **Fiscal 2015-2017, mean of yearly AUCs (primary)** | 12,474 | 55 | **0.776** | [0.721, 0.828] |
+| Fiscal 2015-2018 pooled | 16,478 | 67 | 0.769 | [0.711, 0.820] |
+| Only cases the SEC calls fraud, pooled | 16,449 | 38 | 0.773 | [0.689, 0.836] |
+| Only filer-years with a price | 14,086 | 60 | 0.766 | [0.712, 0.815] |
+| Only total assets of at least $10m | 12,310 | 64 | 0.747 | [0.697, 0.799] |
+| Fiscal 2019-2020, labels incomplete, pooled | 7,974 | 8 | 0.779 | [0.637, 0.939] |
+
+Yearly AUC: 0.791 (2015), 0.805 (2016), 0.733 (2017), 0.727 (2018, 12 frauds, below the 15-fraud rule so not
+in the mean). Verdict under the protocol: **Holds** (bar: 0.725, the lower end of the 2003-2012 interval).
+
+* Bridge check on fiscal 2012-2014, same 8,874 firm-years and 22 frauds: AUC 0.701 on Compustat inputs,
+  0.700 on XBRL inputs. The change of data source costs nothing measurable.
+* Top-of-list results are weaker in the later years: Sens@5% is 0.32, 0.11, 0.06 and 0.08 for 2015-2018.
+* 9 of the 84 labelled firm-years for 2015-2020 are not in the universe (banks and lenders without a
+  classified balance sheet, or no matching 10-K row) and are not scored.
+* Limits: the price is public float / shares, cost of goods sold is missing for about a third of filers,
+  the labels come from one reader with no second coder, and releases from 2025-2026 are not covered.
