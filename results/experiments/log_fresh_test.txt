@@ -1,0 +1,13 @@
+labelled firm-years 2015-2020: 84, present in the universe: 75
+labelled but absent: [(700564, 2016), (844161, 2016), (1158172, 2015), (1286131, 2015), (1309108, 2016), (1550603, 2020), (1580608, 2015), (1604643, 2017), (1811856, 2020)]
+PRIMARY 2015-2018: rows 16478, frauds 67 | mean yearly AUC 0.776 [0.721, 0.828] over [2015, 2016, 2017] NDCG@5% 0.088 Sens@5% 0.160 | pooled AUC 0.769 [0.711, 0.820]
+2019-2020 (labels incomplete): rows 7974, frauds 8 | pooled AUC 0.779 [0.637, 0.939]
+1. tier A only: rows 16449, frauds 38 | pooled AUC 0.773 [0.689, 0.836]
+2. filer-years with a price: rows 14086, frauds 60 | mean yearly AUC 0.766 [0.712, 0.815] over [2015, 2016, 2017] NDCG@5% 0.083 Sens@5% 0.146 | pooled AUC 0.758 [0.706, 0.806]
+3. total assets >= $10m: rows 12310, frauds 64 | mean yearly AUC 0.747 [0.697, 0.799] over [2015, 2016, 2017] NDCG@5% 0.078 Sens@5% 0.131 | pooled AUC 0.731 [0.670, 0.790]
+4. LGBM alone: rows 16478, frauds 67 | mean yearly AUC 0.760 [0.702, 0.813] over [2015, 2016, 2017] NDCG@5% 0.095 Sens@5% 0.197 | pooled AUC 0.754 [0.698, 0.811]
+4. XGB alone: rows 16478, frauds 67 | mean yearly AUC 0.774 [0.723, 0.823] over [2015, 2016, 2017] NDCG@5% 0.091 Sens@5% 0.217 | pooled AUC 0.769 [0.717, 0.821]
+4. LR alone: rows 16478, frauds 67 | mean yearly AUC 0.738 [0.673, 0.798] over [2015, 2016, 2017] NDCG@5% 0.066 Sens@5% 0.142 | pooled AUC 0.724 [0.660, 0.787]
+4. TT alone: rows 16478, frauds 67 | mean yearly AUC 0.728 [0.672, 0.784] over [2015, 2016, 2017] NDCG@5% 0.059 Sens@5% 0.144 | pooled AUC 0.722 [0.655, 0.781]
+5. quarter-only cases added: rows 16478, frauds 74 | mean yearly AUC 0.788 [0.736, 0.835] over [2015, 2016, 2017] NDCG@5% 0.098 Sens@5% 0.174 | pooled AUC 0.775 [0.725, 0.825]
+VERDICT (PROTOCOL_FRESH.md): Holds
