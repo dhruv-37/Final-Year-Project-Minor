@@ -1,0 +1,18 @@
+company,cik,fyears,tier,aaer,note
+Blue Earth Inc,1422109,2013;2014,A,4055;4056;4245,10-Ks for 2013 and 2014 materially false (asset overstated 400% and 125%)
+The Bancorp Inc,1295401,2012;2013,B,4081;4082;4083,loan-loss allowance understated; 2012 and 2013 restated
+Iconix Brand Group,857737,2013,A,4105,2013 10-K overstated brand values and net income
+KIT Digital,1076700,2011,A,4050;4068,2011 10-K overstated revenue
+Quest Software,1088033,1999;2000;2001,A,4035,option backdating 1999-2001 left compensation expense unreported
+China Valves Technology,1080360,2011,A,4123;4287,2011 income overstated and liabilities understated
+Penn West Petroleum,1334388,2012;2013,A,4133,operating costs booked as capital 2012-2014; restated 2012 to Q1 2014
+American Realty Capital Properties (VEREIT),1507385,2013,A,3921;4149,2013 10-K restated (AFFO and expenses)
+Valeant Pharmaceuticals (Bausch Health),885590,2014,A,4153;4154;4155,2014 revenue from Philidor recognised early; restated
+Desarrolladora Homex,1293153,2010;2011;2012,A,3862;4198,home sales inflated 317% in 2010-2012
+Premier Holding Corp,1030916,2013,B,4080,2013 year-end balance sheet carried a grossly inflated note
+Hertz Global Holdings,1364479;47129;1657853,2012;2013,B,4012;4106;4160,FY2012 and FY2013 10-Ks restated (pretax income overstated)
+# Same rule as aaer_labels_fresh.csv: annual statements of that fiscal year materially misstated, per the release text.
+# Read from AAERs released 2019-2024 (digest: experiments/fresh/aaer_digest.py 2019 2024 old). Hertz is the paper's own hand-collected AAER 4012.
+# Not labelled: GT Advanced, Bankrate, CannaVEST (quarters only); Brixmor, Nissan, FCA (disclosure or metrics); Lifeway (internal control);
+# RTI Surgical 2014 (only selected data restated); Fusion Pharm (no SEC filer id); unnamed issuers in auditor cases; bribery cases.
+# Fiscal years 2012-2014 of cases whose conduct runs into 2015 or later come from experiments/fresh/aaer_labels_fresh.csv.

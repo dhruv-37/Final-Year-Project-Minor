@@ -339,3 +339,32 @@ in the mean). Verdict under the protocol: **Holds** (bar: 0.725, the lower end o
   classified balance sheet, or no matching 10-K row) and are not scored.
 * Limits: the price is public float / shares, cost of goods sold is missing for about a third of filers,
   the labels come from one reader with no second coder, and releases from 2025-2026 are not covered.
+
+## Completing the fraud labels for fiscal 2011-2014
+
+Protocol: `experiments/PROTOCOL_LABELS.md`, written before any score on the new labels. Code: `experiments/labels/`.
+The paper's labels come from AAERs released up to 2018, so frauds found later are labelled clean, mostly in the
+last test years. 19 firm-years were relabelled as fraud, from the paper's own AAER file (cases after AAER 3996)
+and from AAERs released 2019-2024 read by hand (same rule as the fresh labels). No label became clean.
+The completed labels are a separate file (`experiments/labels/labels_completed.csv`); the original data is unchanged.
+
+Frauds per test year, paper labels -> completed: 2011 21 -> 23, 2012 19 -> 20, 2013 11 -> 16, 2014 4 -> 15.
+2013 and 2014 now pass the 15-fraud rule, so the test period can run to 2014.
+
+| Labels and model | Years | Proposed AUC | Baseline AUC | Gain [95% CI] |
+|---|---|---|---|---|
+| Paper labels (the reported result) | 2003-2012 | 0.748 | 0.705 | +0.044 [+0.026, +0.063] |
+| Completed labels, saved model re-scored | 2003-2012 | 0.750 | 0.708 | +0.043 [+0.025, +0.061] |
+| Completed labels, saved model re-scored | 2003-2014 | 0.760 | 0.716 | +0.044 [+0.026, +0.064] |
+| Completed labels, every model retrained | 2003-2014 | **0.761** | 0.717 | +0.044 [+0.025, +0.064] |
+
+* Yearly AUC of the proposed model on completed labels, retrained: 0.772 (2011), 0.781 (2012), 0.771 (2013),
+  0.856 (2014). On paper labels 2013 and 2014 were 0.729 and 0.752.
+* Retraining changes nothing for 2003-2012 (the models for those years train on fiscal years up to 2010,
+  where no label changed) and moves 2013-2014 by less than 0.01. The gain comes from the labels, not the model.
+* Results on completed labels are not comparable with the paper's or other published numbers, which use the
+  paper's labels. The labels come from one reader, and these test years have been used many times, so the
+  results are descriptive.
+* Commands: `python experiments/labels/complete_labels.py`, `python experiments/labels/rescore.py`, then
+  `python run_pipeline.py --data data/data_completed_labels.csv --reuse results --out results_labels --skip_final`
+  and `python experiments/labels/compare_retrained.py`. Logs: `results/experiments/log_labels_*.txt`.

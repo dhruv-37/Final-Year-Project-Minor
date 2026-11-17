@@ -1,0 +1,20 @@
+
+=== re-scored (trained on paper labels) ===
+AUC by year 2009-2014, proposed: {2009: 0.7404, 2010: 0.7435, 2011: 0.7715, 2012: 0.7809, 2013: 0.7721, 2014: 0.8491}
+AUC by year 2009-2014, baseline: {2009: 0.6674, 2010: 0.7082, 2011: 0.7281, 2012: 0.7407, 2013: 0.7464, 2014: 0.7718}
+2003-2012 Baseline: RUSBoost (paper, raw 28)  AUC 0.7075  NDCG@5% 0.0693  Sens@5% 0.1057  Prec@1% 0.0176
+2003-2012 PROPOSED: ensemble                  AUC 0.7504  NDCG@5% 0.0852  Sens@5% 0.1575  Prec@1% 0.0206
+2003-2012 gain +0.0429, 95% CI [0.0246, 0.0611], P(gain<=0) 0.0
+2003-2014 Baseline: RUSBoost (paper, raw 28)  AUC 0.7161  NDCG@5% 0.0654  Sens@5% 0.1096  Prec@1% 0.0146
+2003-2014 PROPOSED: ensemble                  AUC 0.7604  NDCG@5% 0.0885  Sens@5% 0.1695  Prec@1% 0.0215
+2003-2014 gain +0.0443, 95% CI [0.0255, 0.0642], P(gain<=0) 0.0
+
+=== retrained on completed labels ===
+AUC by year 2009-2014, proposed: {2009: 0.7404, 2010: 0.7435, 2011: 0.7715, 2012: 0.7809, 2013: 0.7709, 2014: 0.8561}
+AUC by year 2009-2014, baseline: {2009: 0.6674, 2010: 0.7082, 2011: 0.7281, 2012: 0.7407, 2013: 0.7535, 2014: 0.7744}
+2003-2012 Baseline: RUSBoost (paper, raw 28)  AUC 0.7075  NDCG@5% 0.0693  Sens@5% 0.1057  Prec@1% 0.0176
+2003-2012 PROPOSED: ensemble                  AUC 0.7504  NDCG@5% 0.0852  Sens@5% 0.1575  Prec@1% 0.0206
+2003-2012 gain +0.0429, 95% CI [0.0246, 0.0611], P(gain<=0) 0.0
+2003-2014 Baseline: RUSBoost (paper, raw 28)  AUC 0.7169  NDCG@5% 0.0657  Sens@5% 0.1096  Prec@1% 0.0146
+2003-2014 PROPOSED: ensemble                  AUC 0.7609  NDCG@5% 0.0884  Sens@5% 0.1695  Prec@1% 0.0230
+2003-2014 gain +0.0440, 95% CI [0.025, 0.0642], P(gain<=0) 0.0
