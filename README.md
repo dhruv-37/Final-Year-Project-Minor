@@ -368,3 +368,63 @@ Frauds per test year, paper labels -> completed: 2011 21 -> 23, 2012 19 -> 20, 2
 * Commands: `python experiments/labels/complete_labels.py`, `python experiments/labels/rescore.py`, then
   `python run_pipeline.py --data data/data_completed_labels.csv --reuse results --out results_labels --skip_final`
   and `python experiments/labels/compare_retrained.py`. Logs: `results/experiments/log_labels_*.txt`.
+
+## New versus continuing frauds (Protocol 9)
+
+Protocol: `experiments/PROTOCOL_CASES.md`, written before any score was split. Code: `experiments/cases/case_split.py`.
+Half of the test frauds belong to AAER cases that began years earlier: their earlier years sit in the training
+window, masked as clean, but the firm and its history are still seen. The saved final-run scores (no retraining)
+are split by when the fraud's case started. Each group's frauds are compared with all non-frauds of their own year
+(pooled over 2003-2012; 95% intervals from the project's clustered bootstrap).
+
+| Test frauds | Count | Baseline AUC | Proposed AUC | Proposed - baseline | Firm-history gain | Market/recency gain |
+|---|---|---|---|---|---|---|
+| Continuing (case began 2+ years earlier) | 191 | 0.739 | 0.754 | +0.015 [-0.010, +0.039] | **+0.013 [+0.007, +0.019]** | +0.000 [-0.006, +0.007] |
+| Gap-start (case began the year before) | 69 | 0.693 | 0.739 | +0.046 [+0.008, +0.083] | +0.006 [-0.007, +0.018] | +0.002 [-0.008, +0.013] |
+| New (case began in the test year) | 98 | 0.675 | 0.739 | **+0.064 [+0.031, +0.095]** | +0.002 [-0.007, +0.011] | **+0.015 [+0.005, +0.024]** |
+
+* **The model finds new frauds.** Its gain over the baseline holds on frauds whose case starts in the test year,
+  and is largest there; the baseline mostly ranks ongoing cases.
+* **The firm-history (Temporal Transformer) gain comes from continuing cases.** On new frauds it adds no AUC and
+  lowers top-5% recall (-0.051 [-0.103, -0.010]). It mainly recognises firms in an ongoing fraud, which is still
+  useful to an auditor but is not early detection of new fraud.
+* **The market-feature and recency gain comes from new cases.**
+* The top of the list is weak for new frauds: about 1% of them are in their year's top 1%.
+* The same conclusions hold when the case start is taken from the data alone instead of the paper's AAER file.
+  Results: `results/experiments/case_split.json`.
+
+## MD&A text features (Protocol 10): tried, did not pass the validation gate
+
+Protocol: `experiments/PROTOCOL_MDA.md`, committed before any MD&A feature was built. Code: `experiments/mda/`
+(`download_mda.py`, `mda_features.py`, `run_mda.py`). Reference: the final ensemble (CV AUC 0.786).
+
+* **Text:** Item 7 (MD&A) of every 10-K in EDGAR-CORPUS, filing years 1993-2020 (all 28 years downloaded, none
+  skipped). Each MD&A is matched to its fiscal year through the Loughran-McDonald filing index and to the firm
+  through the CIK-gvkey link valid on the filing date. 59,858 firm-years have a usable MD&A (at least 1,000
+  words): about 47% of rows in 1996-2006 and 54-58% from 2007; almost none before 1995.
+* **Missing text is informative:** in the validation years 62-73% of frauds have an MD&A against 47% of
+  non-frauds, and "has an MD&A" alone ranks frauds at AUC 0.57-0.63. So there is no missing-text flag: a
+  firm-year without text gets the block of a random firm-year of the same year that has one.
+* **M1 (content):** TF-IDF of the 20,000 most common words and word pairs, reduced to 50 components fitted on
+  each window's training MD&As. **M2 (change):** log word count, similarity to the firm's previous MD&A, distance
+  from the year's industry (SIC-2) average.
+
+| Setting | Seeds | CV AUC gain, all rows | Rows with an MD&A | New-case frauds |
+|---|---|---|---|---|
+| M1 | 42 | −0.0083 | −0.0110 | −0.0083 |
+| M2 | 42 | −0.0005 | +0.0014 | −0.0013 |
+| M1+M2 | 42 | −0.0075 | −0.0090 | −0.0078 |
+| M2, check | 43, 44 | −0.0017 | −0.0004 | −0.0008 |
+| M2 placebo (text shuffled within year) | 43, 44 | −0.0016 | | |
+
+The gate needed at least +0.002 on all rows and on rows with an MD&A, on seeds 43-44.
+
+* **Not adopted, and the test years were not used:** there is no 2003-2012 result for MD&A text.
+* **The content components hurt:** −0.008 on all rows and −0.011 on rows with text. With about 300 validation
+  frauds they add dimensions the trees fit without finding signal beyond the financial and market features.
+* **The change measures do nothing:** M2 scores the same as its placebo (−0.0017 against −0.0016). The
+  firm's year-on-year MD&A change and its distance from peers add nothing the 147 existing features lack.
+* **Untested:** richer text models (LLM embeddings or a fine-tuned language model). Word-level MD&A features
+  do not help this model under these rules.
+* Results: `results/experiments/mda_coverage.json`, `cv_mda_screen.json`, `cv_mda.json` and the `log_mda_*.txt`
+  logs.
