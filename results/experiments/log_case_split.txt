@@ -1,0 +1,36 @@
+
+=== case start from aaer file + data ===
+continuing  frauds  191  baseline AUC 0.739 S5 0.126 S1 0.031  proposed AUC 0.754 S5 0.173 S1 0.037  TT_alone AUC 0.742 S5 0.168 S1 0.026
+            proposed_vs_baseline   AUC +0.0150 [-0.0099, 0.0389]   Sens@5% +0.0471 [0.0, 0.0995]
+            firm_history_gain      AUC +0.0126 [0.0069, 0.0187]   Sens@5% +0.0105 [-0.0157, 0.0419]
+            market_recency_gain    AUC +0.0004 [-0.0057, 0.0065]   Sens@5% -0.0262 [-0.0628, 0.0105]
+gap-start   frauds   69  baseline AUC 0.693 S5 0.058 S1 0.029  proposed AUC 0.739 S5 0.188 S1 0.043  TT_alone AUC 0.710 S5 0.087 S1 0.015
+            proposed_vs_baseline   AUC +0.0460 [0.0082, 0.0834]   Sens@5% +0.1304 [0.0435, 0.2319]
+            firm_history_gain      AUC +0.0058 [-0.0068, 0.0183]   Sens@5% +0.0145 [-0.029, 0.058]
+            market_recency_gain    AUC +0.0023 [-0.0075, 0.0134]   Sens@5% +0.0145 [-0.0435, 0.0725]
+new         frauds   98  baseline AUC 0.675 S5 0.092 S1 0.020  proposed AUC 0.739 S5 0.112 S1 0.010  TT_alone AUC 0.693 S5 0.041 S1 0.000
+            proposed_vs_baseline   AUC +0.0639 [0.031, 0.0948]   Sens@5% +0.0204 [-0.0412, 0.0909]
+            firm_history_gain      AUC +0.0016 [-0.0068, 0.0105]   Sens@5% -0.0510 [-0.1031, -0.0101]
+            market_recency_gain    AUC +0.0149 [0.0053, 0.0243]   Sens@5% +0.0000 [-0.0408, 0.0412]
+all         frauds  358  baseline AUC 0.713 S5 0.103 S1 0.028  proposed AUC 0.747 S5 0.159 S1 0.031  TT_alone AUC 0.723 S5 0.117 S1 0.017
+            proposed_vs_baseline   AUC +0.0342 [0.0157, 0.0516]   Sens@5% +0.0559 [0.0168, 0.0947]
+            firm_history_gain      AUC +0.0083 [0.003, 0.013]   Sens@5% -0.0056 [-0.0306, 0.0168]
+            market_recency_gain    AUC +0.0047 [-0.0002, 0.0094]   Sens@5% -0.0112 [-0.0364, 0.014]
+
+=== case start from data only ===
+continuing  frauds  181  baseline AUC 0.740 S5 0.133 S1 0.033  proposed AUC 0.761 S5 0.182 S1 0.039  TT_alone AUC 0.750 S5 0.177 S1 0.028
+            proposed_vs_baseline   AUC +0.0204 [-0.0038, 0.0456]   Sens@5% +0.0497 [-0.0055, 0.0994]
+            firm_history_gain      AUC +0.0132 [0.0068, 0.0192]   Sens@5% +0.0110 [-0.0166, 0.0387]
+            market_recency_gain    AUC +0.0006 [-0.0056, 0.0067]   Sens@5% -0.0276 [-0.0663, 0.011]
+gap-start   frauds   71  baseline AUC 0.695 S5 0.028 S1 0.014  proposed AUC 0.734 S5 0.169 S1 0.042  TT_alone AUC 0.701 S5 0.085 S1 0.014
+            proposed_vs_baseline   AUC +0.0398 [-0.0032, 0.08]   Sens@5% +0.1408 [0.0563, 0.2254]
+            firm_history_gain      AUC +0.0045 [-0.0081, 0.0163]   Sens@5% +0.0141 [-0.0282, 0.0563]
+            market_recency_gain    AUC +0.0019 [-0.008, 0.0121]   Sens@5% +0.0141 [-0.0423, 0.0704]
+new         frauds  106  baseline AUC 0.678 S5 0.104 S1 0.028  proposed AUC 0.733 S5 0.113 S1 0.009  TT_alone AUC 0.690 S5 0.038 S1 0.000
+            proposed_vs_baseline   AUC +0.0544 [0.0211, 0.0877]   Sens@5% +0.0094 [-0.0556, 0.0762]
+            firm_history_gain      AUC +0.0023 [-0.0063, 0.0112]   Sens@5% -0.0472 [-0.0952, -0.0089]
+            market_recency_gain    AUC +0.0138 [0.0043, 0.023]   Sens@5% +0.0000 [-0.0377, 0.0377]
+all         frauds  358  baseline AUC 0.713 S5 0.103 S1 0.028  proposed AUC 0.747 S5 0.159 S1 0.031  TT_alone AUC 0.723 S5 0.117 S1 0.017
+            proposed_vs_baseline   AUC +0.0342 [0.0142, 0.0526]   Sens@5% +0.0559 [0.0167, 0.0952]
+            firm_history_gain      AUC +0.0083 [0.0032, 0.0126]   Sens@5% -0.0056 [-0.028, 0.0168]
+            market_recency_gain    AUC +0.0047 [0.0002, 0.0096]   Sens@5% -0.0112 [-0.0365, 0.014]
