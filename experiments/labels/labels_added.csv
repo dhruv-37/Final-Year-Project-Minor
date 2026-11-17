@@ -1,0 +1,42 @@
+source,company,fyear,tier,case,ciks,gvkey,status
+pre2015,Blue Earth Inc,2013,A,4055,1422109,183921,added
+pre2015,Blue Earth Inc,2014,A,4055,1422109,183921,added
+pre2015,The Bancorp Inc,2012,B,4081,1295401,,firm-year not in data
+pre2015,The Bancorp Inc,2013,B,4081,1295401,,firm-year not in data
+pre2015,Iconix Brand Group,2013,A,4105,857737,20204,added
+pre2015,KIT Digital,2011,A,4050,1076700,141240,added
+pre2015,Quest Software,1999,A,4035,1088033,122921,already fraud in the data
+pre2015,Quest Software,2000,A,4035,1088033,,firm-year not in data
+pre2015,Quest Software,2001,A,4035,1088033,,firm-year not in data
+pre2015,China Valves Technology,2011,A,4123,1080360,116284,added
+pre2015,Penn West Petroleum,2012,A,4133,1334388,,firm-year not in data
+pre2015,Penn West Petroleum,2013,A,4133,1334388,20684,already fraud in the data
+pre2015,American Realty Capital Properties (VEREIT),2013,A,3921,1507385,,firm-year not in data
+pre2015,Valeant Pharmaceuticals (Bausch Health),2014,A,4153,885590,29955,added
+pre2015,Desarrolladora Homex,2010,A,3862,1293153,160780,already fraud in the data
+pre2015,Desarrolladora Homex,2011,A,3862,1293153,160780,already fraud in the data
+pre2015,Desarrolladora Homex,2012,A,3862,1293153,160780,already fraud in the data
+pre2015,Premier Holding Corp,2013,B,4080,1030916,,firm-year not in data
+pre2015,Hertz Global Holdings,2012,B,4012,1364479;47129;1657853,,firm-year not in data
+pre2015,Hertz Global Holdings,2013,B,4012,1364479;47129;1657853,,firm-year not in data
+fresh,Comscore Inc,2014,A,4091,1158172,,firm-year not in data
+fresh,Quadrant 4 System Corp,2013,A,4062,878802,,firm-year not in data
+fresh,Quadrant 4 System Corp,2014,A,4062,878802,185003,added
+fresh,StoneMor Partners LP,2013,B,4107,1286131,,firm-year not in data
+fresh,StoneMor Partners LP,2014,B,4107,1286131,,firm-year not in data
+fresh,Quantum Corp,2014,B,4110,709283,8867,added
+fresh,Hill International,2014,A,4120,1287808,175055,added
+fresh,BorgWarner Inc,2012,B,4164,908255,28742,added
+fresh,BorgWarner Inc,2013,B,4164,908255,28742,added
+fresh,BorgWarner Inc,2014,B,4164,908255,28742,added
+fresh,Power Solutions International,2014,A,4169,1137091,187169,added
+fresh,Revolution Lighting Technologies,2014,A,4170,917523,29921,added
+fresh,Manitex International,2014,A,4177,1302028,161843,added
+fresh,Synchronoss Technologies,2013,A,4302,1131554,166593,added
+fresh,Synchronoss Technologies,2014,A,4302,1131554,166593,added
+fresh,CHS Inc,2014,B,4330,823277,,firm-year not in data
+fresh,Roadrunner Transportation Systems,2013,A,4375,1440024,180562,added
+fresh,Roadrunner Transportation Systems,2014,A,4375,1440024,180562,added
+fresh,Accelera Innovations,2014,A,3911,1444144,,no GVKEY link
+fresh,Santander Consumer USA,2013,B,4002,1580608,,firm-year not in data
+fresh,Santander Consumer USA,2014,B,4002,1580608,,firm-year not in data

@@ -4,6 +4,9 @@ Reads the AAER texts mirrored at huggingface.co/datasets/codewithdark/SEC-RPT-Pa
 documents) and prints, for every release that talks about misstated financial statements in fiscal
 years 2015 or later, the opening of its summary and the sentences that name the period. The labels in
 aaer_labels_fresh.csv were then written by hand from this digest. Nothing here assigns a label.
+
+    python experiments/fresh/aaer_digest.py 2019 2024          # conduct in fiscal 2015 or later
+    python experiments/fresh/aaer_digest.py 2019 2024 old      # conduct in fiscal 1991-2014 (PROTOCOL_LABELS.md)
 """
 import os
 import re
@@ -19,10 +22,11 @@ KEY = re.compile(r'misstat|overstat|understat|restat|inflat|improperly rec|prema
                  r'(financial|revenue|record)|fraudulent(ly)? (financial|record|recogni|account)|materially false|'
                  r'accounting fraud|not in (conformity|accordance) with GAAP|violat\w+ (of )?GAAP|earnings management|'
                  r'manipulat', re.I)
-YEAR = re.compile(r'\b(20(?:1[5-9]|2[0-3]))\b')
+YEAR = re.compile(r'\b(20(?:1[5-9]|2[0-3]))\b')          # conduct years for the fresh labels
+OLD = re.compile(r'\b(199[1-9]|200\d|201[0-4])\b')        # conduct years for completing the paper's labels
 
 
-def digest(lo=2019, hi=2024, width=650):
+def digest(lo=2019, hi=2024, width=650, years=YEAR):
     m = pd.read_csv(os.path.join(SRC, 'aaer_manifest.csv'))
     m = m[m.year.between(lo, hi)].drop_duplicates('aaer_no').sort_values('aaer_no')
     kept = 0
@@ -33,7 +37,7 @@ def digest(lo=2019, hi=2024, width=650):
         t = re.sub(r'\s+', ' ', open(p, encoding='utf-8', errors='replace').read())
         body = t[re.search(r'release no\.? ?\d{4}', t, re.I).end():] if re.search(r'release no\.? ?\d{4}', t, re.I) else t
         sents = re.split(r'(?<=[.;])\s+(?=[A-Z0-9(])', body)
-        hits = [s for s in sents if KEY.search(s) and YEAR.search(s) and len(s) < 600]
+        hits = [s for s in sents if KEY.search(s) and years.search(s) and len(s) < 600]
         if not hits:
             continue
         kept += 1
@@ -48,4 +52,4 @@ def digest(lo=2019, hi=2024, width=650):
 
 
 if __name__ == '__main__':
-    digest(*(int(a) for a in sys.argv[1:3]))
+    digest(int(sys.argv[1]), int(sys.argv[2]), years=OLD if sys.argv[3:4] == ['old'] else YEAR)
