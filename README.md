@@ -368,27 +368,3 @@ Frauds per test year, paper labels -> completed: 2011 21 -> 23, 2012 19 -> 20, 2
 * Commands: `python experiments/labels/complete_labels.py`, `python experiments/labels/rescore.py`, then
   `python run_pipeline.py --data data/data_completed_labels.csv --reuse results --out results_labels --skip_final`
   and `python experiments/labels/compare_retrained.py`. Logs: `results/experiments/log_labels_*.txt`.
-
-## New versus continuing frauds (Protocol 9)
-
-Protocol: `experiments/PROTOCOL_CASES.md`, written before any score was split. Code: `experiments/cases/case_split.py`.
-Half of the test frauds belong to AAER cases that began years earlier: their earlier years sit in the training
-window, masked as clean, but the firm and its history are still seen. The saved final-run scores (no retraining)
-are split by when the fraud's case started. Each group's frauds are compared with all non-frauds of their own year
-(pooled over 2003-2012; 95% intervals from the project's clustered bootstrap).
-
-| Test frauds | Count | Baseline AUC | Proposed AUC | Proposed - baseline | Firm-history gain | Market/recency gain |
-|---|---|---|---|---|---|---|
-| Continuing (case began 2+ years earlier) | 191 | 0.739 | 0.754 | +0.015 [-0.010, +0.039] | **+0.013 [+0.007, +0.019]** | +0.000 [-0.006, +0.007] |
-| Gap-start (case began the year before) | 69 | 0.693 | 0.739 | +0.046 [+0.008, +0.083] | +0.006 [-0.007, +0.018] | +0.002 [-0.008, +0.013] |
-| New (case began in the test year) | 98 | 0.675 | 0.739 | **+0.064 [+0.031, +0.095]** | +0.002 [-0.007, +0.011] | **+0.015 [+0.005, +0.024]** |
-
-* **The model finds new frauds.** Its gain over the baseline holds on frauds whose case starts in the test year,
-  and is largest there; the baseline mostly ranks ongoing cases.
-* **The firm-history (Temporal Transformer) gain comes from continuing cases.** On new frauds it adds no AUC and
-  lowers top-5% recall (-0.051 [-0.103, -0.010]). It mainly recognises firms in an ongoing fraud, which is still
-  useful to an auditor but is not early detection of new fraud.
-* **The market-feature and recency gain comes from new cases.**
-* The top of the list is weak for new frauds: about 1% of them are in their year's top 1%.
-* The same conclusions hold when the case start is taken from the data alone instead of the paper's AAER file.
-  Results: `results/experiments/case_split.json`.
