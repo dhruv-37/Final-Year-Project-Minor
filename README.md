@@ -424,7 +424,19 @@ The gate needed at least +0.002 on all rows and on rows with an MD&A, on seeds 4
   frauds they add dimensions the trees fit without finding signal beyond the financial and market features.
 * **The change measures do nothing:** M2 scores the same as its placebo (−0.0017 against −0.0016). The
   firm's year-on-year MD&A change and its distance from peers add nothing the 147 existing features lack.
-* **Untested:** richer text models (LLM embeddings or a fine-tuned language model). Word-level MD&A features
-  do not help this model under these rules.
-* Results: `results/experiments/mda_coverage.json`, `cv_mda_screen.json`, `cv_mda.json` and the `log_mda_*.txt`
-  logs.
+* **Text-only member (Protocol 10b, pre-registered after the above failed, the last MD&A test):** a logistic
+  regression on all 20,000 TF-IDF terms, trained only on the text and rank-averaged as a fifth member.
+
+| Member T, seeds 43-44 | All rows | Rows with an MD&A | New-case frauds | Placebo (all rows) |
+|---|---|---|---|---|
+| Gain over the final ensemble | −0.0029 | −0.0001 | +0.0126 | −0.0090 |
+
+  It fails the gate, so the test years were not used. The text carries some signal: T alone ranks frauds at AUC
+  0.58-0.65 on rows with text, and real text beats shuffled text by about 0.006. But the training windows hold
+  only 36-81 frauds with an MD&A, and the signal overlaps what the ensemble already has. Its gain on new-case
+  frauds (+0.013, the same on seed 42) is the one hint that text helps where the model is weakest. It was
+  reported, not a gate, so it is not evidence of an improvement.
+* **Untested:** LLM embeddings or a fine-tuned language model. Word-level MD&A text does not help this model
+  under these rules.
+* Results: `results/experiments/mda_coverage.json`, `cv_mda_screen.json`, `cv_mda.json`, `cv_mda_text.json`
+  and the `log_mda_*.txt` logs.

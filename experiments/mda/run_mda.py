@@ -158,12 +158,79 @@ def stage_test():
             pickle.dump({k: score(st, k, s) for k in keys('test')}, fh)
 
 
+# ------------------------------------------------------------------ Protocol 10b: text-only member T
+def text_docs(key, placebo=False):
+    """Member-T score per MD&A (index order): L2 logistic regression on window TF-IDF, trained on training
+    firm-years with text. Placebo: texts permuted among firm-years with text within each fiscal year (seed 7)."""
+    p = path('mda', 'text', f"{'placebo_' if placebo else ''}{key}.pkl")
+    if not os.path.exists(p):
+        from sklearn.linear_model import LogisticRegression
+        c = ctx()
+        idx = mf.link()['index']
+        rows, fy = idx['row'].values, idx['fyear'].values
+        order = np.arange(len(idx))
+        if placebo:
+            rng = np.random.RandomState(7)
+            for yr in np.unique(fy):
+                r = np.where(fy == yr)[0]
+                order[r] = r[rng.permutation(len(r))]
+        tr, te = split(key)
+        lab = np.full(len(c.y), -1)
+        lab[tr] = mask_serial(c.y, c.paaer, tr, te)
+        fit = np.where(np.isin(rows, tr))[0]
+        T = mf._tfidf(mf.counts(), fit)[order]
+        m = LogisticRegression(C=1.0, class_weight='balanced', solver='liblinear', max_iter=1000)
+        m.fit(T[fit], lab[rows[fit]])
+        s = m.decision_function(T).astype(np.float32)
+        with open(p, 'wb') as fh:
+            pickle.dump(s, fh)
+        print(f'  T {key}{" placebo" if placebo else ""}: {len(fit)} training MD&As, {int(lab[rows[fit]].sum())} frauds', flush=True)
+    return load(p)
+
+
+def text_member(key, placebo=False):
+    """Panel-length member-T scores for the key's scored rows; rows without text take their donor's score."""
+    return mf.to_panel(text_docs(key, placebo)[:, None])[:, 0][split(key)[1]]
+
+
+def score_t(key, seed, placebo=False):
+    from run_auc import member_path as final_member_path
+    return ensemble_scores([load(final_member_path(key, m, seed)) for m in MEMBERS] + [tt_score(key, seed),
+                           text_member(key, placebo)])
+
+
+def stage_text():
+    c = ctx()
+    has = mf.usable()
+    for k in keys('cv'):
+        text_docs(k)
+        text_docs(k, placebo=True)
+    own = {}
+    for k in keys('cv'):
+        te = split(k)[1]
+        h = has[te]
+        own[k] = round(float(roc_auc_score(c.y[te][h], text_member(k)[h])), 4)
+    rows = ('all', 'mda', 'new')
+    out = {'member_T_auc_on_rows_with_text': own}
+    for name, seeds in (('screen_seed42', (SCREEN_SEED,)), ('check_seeds43_44', CHECK_SEEDS)):
+        ref = {r: mean_auc(reference, seeds, r) for r in rows}
+        g = {f'gain_{r}': mean_auc(score_t, seeds, r) - ref[r] for r in rows}
+        g['placebo_gain'] = mean_auc(lambda k, s: score_t(k, s, placebo=True), seeds) - ref['all']
+        out[name] = {'reference': ref, **g}
+        print(name, json.dumps(out[name], indent=1), flush=True)
+    ck = out['check_seeds43_44']
+    out['gate'] = bool(ck['gain_all'] >= GATE and ck['gain_mda'] >= GATE and ck['placebo_gain'] <= PLACEBO_MAX)
+    print('member T AUC on rows with text', own, 'gate', out['gate'], flush=True)
+    json.dump(out, open(os.path.join(OUT, 'cv_mda_text.json'), 'w'), indent=2)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--stage', choices=['prepare', 'screen', 'check', 'test'], required=True)
+    ap.add_argument('--stage', choices=['prepare', 'screen', 'check', 'test', 'text'], required=True)
     a = ap.parse_args()
     ctx()
-    {'prepare': stage_prepare, 'screen': stage_screen, 'check': stage_check, 'test': stage_test}[a.stage]()
+    {'prepare': stage_prepare, 'screen': stage_screen, 'check': stage_check, 'test': stage_test,
+     'text': stage_text}[a.stage]()
 
 
 if __name__ == '__main__':

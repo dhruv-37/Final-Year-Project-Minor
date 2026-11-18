@@ -65,3 +65,23 @@ new and continuing cases. Holm-adjusted p-values over all candidates tested on t
 Caveat kept in the report: an MD&A can mention an investigation already under way. A user would see the
 same filing, so this is not leakage, but part of any gain may be early detection rather than prediction.
 No rule changes after test results are seen.
+
+## Protocol 10b: text-only ensemble member (written 2026-11-18, after Protocol 10 failed its gate, before any score of this member existed)
+Protocol 10 put the text into the trees as 50 SVD components and failed (CV −0.008); the change measures matched
+the placebo. This is the one further MD&A test; whatever its result, no other MD&A variant is tried.
+
+* **Member T:** L2 logistic regression (C = 1.0, class_weight balanced, liblinear) on the sublinear TF-IDF of
+  the same 20,000-term counts. IDF is fitted on the window's training MD&As only. It is trained on training
+  firm-years with a usable MD&A, labels masked exactly as for the other members (serial-fraud masking). No
+  financial features enter it. Nothing is tuned: the values above are fixed now.
+* **Rows without text:** take the member-T score of their donor (the same donor rule as Protocol 10), so no row
+  is marked as missing.
+* **Ensemble:** the final ensemble's four member scores (LGBM, XGB, LR, Temporal Transformer; cached, unchanged) plus T,
+  equal-weight rank average.
+* **Placebo:** the MD&As are permuted among firm-years with text within each fiscal year (seed 7, as in
+  Protocol 10) before T is fitted and scored.
+* **Gate** (validation years 1999-2001, mean of seeds 43 and 44; seed 42 is reported as a screen): gain over the
+  final ensemble at least +0.002 on all rows and at least +0.002 on rows with a usable MD&A, placebo gain at most
+  +0.001. The gain on new-case frauds and T's own AUC on rows with text are reported but are not gates.
+* **If it passes:** Stage 2 above, unchanged (2003-2012, 3 seeds, adoption rule, Holm over all test-year
+  candidates, positive gain on rows with text, Protocol 9 split). If it fails, the test years are not used.
